@@ -11,5 +11,9 @@ data Currency =
 
 data Amount = Amount { currency :: Currency,
                        value :: Integer } deriving (Show, Eq, Ord)
-amountAdd Amount{ currency=ac,value=av} Amount{ currency=bc,value=bv} = Amount{ currency=ac,value= av + bv}
- 
+amountAdd Amount{ currency=ac,value=av} Amount{ currency=bc,value=bv} =
+  if ac == bc then
+    Amount{ currency=ac,value= av + bv}
+  else
+    error "Cant add two amounts with different currency"
+
