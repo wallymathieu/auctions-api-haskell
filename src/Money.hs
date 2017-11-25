@@ -1,4 +1,6 @@
+{-# LANGUAGE DeriveGeneric     #-}
 module Money where
+import GHC.Generics
 
 data Currency = 
   -- virtual acution currency
@@ -7,10 +9,13 @@ data Currency =
   |SEK
   -- Danish 'Krone'
   |DKK
-  deriving (Show, Eq, Ord)
+  deriving (Generic, Show, Eq, Ord)
 
-data Amount = Amount { currency :: Currency,
-                       value :: Integer } deriving (Show, Eq, Ord)
+data Amount = Amount { 
+  currency :: Currency,
+  value :: Integer 
+} deriving (Generic, Show, Eq, Ord)
+
 amountAdd Amount{ currency=ac,value=av} Amount{ currency=bc,value=bv} =
   if ac == bc then
     Amount{ currency=ac,value= av + bv}

@@ -1,8 +1,10 @@
+{-# LANGUAGE DeriveGeneric     #-}
 module Domain.TimedAscending where
 import Money
 import Domain.Prelude
 import Domain.State
 import Domain.Bid
+import GHC.Generics
 
 data Options = Options { 
   {- the seller has set a minimum sale price in advance (the 'reserve' price) 
@@ -16,7 +18,8 @@ data Options = Options {
      the standing bid becomes the winner, and the item is sold to the highest bidder 
      at a price equal to his or her bid. -}
   timeFrame:: TimeSpan
-}
+} deriving (Generic, Show)
+
 
 data State =
   AwaitingStart { start:: DateTime , startingExpiry:: DateTime , opt::Options }

@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveGeneric     #-}
 module Domain.SingleSealedBid where
 import Money
 import Domain.Prelude
@@ -5,6 +6,7 @@ import Domain.State
 import Domain.Bid
 import qualified Data.Map as Map
 import qualified Data.List as List
+import GHC.Generics
 
 data Options =
   {- Sealed first-price auction 
@@ -15,12 +17,12 @@ data Options =
   {- Also known as a sealed-bid second-price auction.
     This is identical to the sealed first-price auction except that the winning bidder pays the second-highest bid
     rather than his or her own -}
-  |Vickrey
+  |Vickrey deriving (Generic, Show)
 
 data State =
   AcceptingBids { bidsMap:: Map.Map UserId Bid, expiry:: DateTime, opt::Options }
   | DisclosingBids { bids:: [Bid], expired:: DateTime , opt::Options }
-
+  
 instance Domain.State.State Domain.SingleSealedBid.State where
   -- inc :: DateTime -> S -> S
   inc now state = case state of
