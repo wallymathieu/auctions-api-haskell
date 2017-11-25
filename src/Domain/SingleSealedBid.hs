@@ -21,7 +21,7 @@ data State =
 
 instance Domain.Prelude.State Domain.SingleSealedBid.State where
   -- inc :: DateTime -> S -> S
-  inc now state = case state of 
+  inc now state = case state of
            AcceptingBids { bidsMap=bids,expiry=expiry,opt=opt }-> 
             if now>=expiry then
               let bs = Map.toList bids in
@@ -35,14 +35,14 @@ instance Domain.Prelude.State Domain.SingleSealedBid.State where
   addBid bid state = 
           let auctionId= auction bid in
           let user= bidder bid in
-          case state of 
+          case state of
            AcceptingBids { bidsMap=bids,expiry=expiry,opt=opt }-> 
              case (at bid>=expiry, Map.member user bids ) of
-             (False,True) -> 
+             (False,True) ->
               (state, Left AlreadyPlacedBid)
-             (False,False) -> 
+             (False,False) ->
               (AcceptingBids { bidsMap=Map.insert user bid bids, expiry=expiry, opt=opt }, Right ())
-             (True,_) -> 
+             (True,_) ->
               let bs = Map.toList bids in
               let bids= List.map snd bs in
               (DisclosingBids { bids=bids, expired=expiry, opt=opt},Left (AuctionHasEnded auctionId))
