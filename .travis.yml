@@ -17,6 +17,7 @@ script:
 - mkdir -p to-travis
 - stack --no-terminal build --copy-bins --local-bin-path to-travis
 - stack --no-terminal test
+- curl -sL https://raw.github.com/ndmitchell/hlint/master/misc/travis.sh | sh -s .
 
 cache:
   directories:
