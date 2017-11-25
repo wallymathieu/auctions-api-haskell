@@ -16,7 +16,7 @@ import qualified Money as M
 import qualified Domain.Prelude as DP
 import qualified Domain.Auction as A
 
-data BidReq = BidReq { 
+newtype BidReq = BidReq { 
   amount:: P.Integer 
 } deriving (Generic, P.Show)
 
