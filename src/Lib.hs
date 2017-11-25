@@ -1,7 +1,7 @@
 module Lib
     ( someFunc
     ) where
-import Domain
+import Domain.Auction
 
 someFunc :: IO ()
 someFunc = putStrLn "someFunc"

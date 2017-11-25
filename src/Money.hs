@@ -1,4 +1,4 @@
-module Money (Currency, Amount) where
+module Money where
 
 data Currency = 
   -- virtual acution currency
@@ -7,7 +7,9 @@ data Currency =
   |SEK
   -- Danish 'Krone'
   |DKK
-  deriving Show
+  deriving (Show, Eq, Ord)
 
 data Amount = Amount { currency :: Currency,
-                       value :: Integer } deriving Show
+                       value :: Integer } deriving (Show, Eq, Ord)
+amountAdd Amount{ currency=ac,value=av} Amount{ currency=bc,value=bv} = Amount{ currency=ac,value= av + bv}
+ 

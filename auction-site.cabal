@@ -15,8 +15,8 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     Lib
-  build-depends:       base >= 4.7 && < 5
+  exposed-modules:     Lib, Domain.Auction, Domain.Prelude, Domain.SingleSealedBid, Domain.TimedAscending, Money
+  build-depends:       base >= 4.7 && < 5, containers >= 0.5 && <0.6
   default-language:    Haskell2010
 
 executable auction-site-exe
