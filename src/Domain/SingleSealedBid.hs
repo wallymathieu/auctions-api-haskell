@@ -1,6 +1,8 @@
 module Domain.SingleSealedBid where
 import Money
 import Domain.Prelude
+import Domain.State
+import Domain.Bid
 import qualified Data.Map as Map
 import qualified Data.List as List
 
@@ -19,7 +21,7 @@ data State =
   AcceptingBids { bidsMap:: Map.Map UserId Bid, expiry:: DateTime, opt::Options }
   | DisclosingBids { bids:: [Bid], expired:: DateTime , opt::Options }
 
-instance Domain.Prelude.State Domain.SingleSealedBid.State where
+instance Domain.State.State Domain.SingleSealedBid.State where
   -- inc :: DateTime -> S -> S
   inc now state = case state of
            AcceptingBids { bidsMap=bids,expiry=expiry,opt=opt }-> 

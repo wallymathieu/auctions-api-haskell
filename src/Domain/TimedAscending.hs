@@ -1,6 +1,8 @@
 module Domain.TimedAscending where
 import Money
 import Domain.Prelude
+import Domain.State
+import Domain.Bid
 
 data Options = Options { 
   {- the seller has set a minimum sale price in advance (the 'reserve' price) 
@@ -21,7 +23,7 @@ data State =
   | OnGoing { bids:: [Bid] , nextExpiry:: DateTime , opt::Options }
   | HasEnded { bids:: [Bid] , expired:: DateTime , opt::Options }
 
-instance Domain.Prelude.State Domain.TimedAscending.State where
+instance Domain.State.State Domain.TimedAscending.State where
   -- inc :: DateTime -> State -> State
   inc now state = case state of 
                       AwaitingStart {start=start, startingExpiry=startingExpiry, opt=opt} ->
@@ -69,4 +71,3 @@ instance Domain.Prelude.State Domain.TimedAscending.State where
                               (HasEnded{bids=bids, expired=nextExpiry, opt=opt}, Left (AuctionHasEnded auctionId))
                       HasEnded { } ->
                           (state, Left (AuctionHasEnded auctionId))
-

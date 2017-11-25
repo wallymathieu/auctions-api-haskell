@@ -1,5 +1,5 @@
 module Domain.Prelude where
-    
+
 import Money
 type UserId = String
 
@@ -11,13 +11,6 @@ type AuctionId = Integer
 type TimeSpan = Integer 
 -- milliseconds to begin with
 type DateTime = Integer
-
-data Bid = Bid { bidId :: BidId,
-  auction :: AuctionId,
-  bidder :: UserId,
-  at :: DateTime,
-  amount :: Amount
-}
 
 data Errors = 
   UnknownAuction AuctionId
@@ -32,7 +25,3 @@ data Errors =
   | InvalidUserData String
   | MustPlaceBidOverHighestBid Amount
   | AlreadyPlacedBid
-
-class State a where
-  inc :: DateTime -> a -> a
-  addBid :: Bid -> a -> (a, Either Errors ())
