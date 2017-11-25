@@ -21,51 +21,52 @@ data State =
   | OnGoing { bids:: [Bid] , nextExpiry:: DateTime , opt::Options }
   | HasEnded { bids:: [Bid] , expired:: DateTime , opt::Options }
 
-inc :: DateTime -> State -> State
-inc now state = case state of 
-                    AwaitingStart {start=start, startingExpiry=startingExpiry, opt=opt} ->
-                        case (now > start, now < startingExpiry) of 
-                            (True,True) -> OnGoing{bids=[],nextExpiry=startingExpiry, opt=opt}
-                            (True, False) -> HasEnded{bids=[],expired=startingExpiry, opt=opt}
-                            _ -> state
-                    OnGoing {bids=bids,nextExpiry=nextExpiry, opt=opt} ->
-                        if now<nextExpiry then
-                            state
-                          else
-                            HasEnded{bids=bids, expired=nextExpiry, opt=opt}
-                    HasEnded { } ->
-                        state
+instance Domain.Prelude.State Domain.TimedAscending.State where
+  -- inc :: DateTime -> State -> State
+  inc now state = case state of 
+                      AwaitingStart {start=start, startingExpiry=startingExpiry, opt=opt} ->
+                          case (now > start, now < startingExpiry) of 
+                              (True,True) -> OnGoing{bids=[],nextExpiry=startingExpiry, opt=opt}
+                              (True, False) -> HasEnded{bids=[],expired=startingExpiry, opt=opt}
+                              _ -> state
+                      OnGoing {bids=bids,nextExpiry=nextExpiry, opt=opt} ->
+                          if now<nextExpiry then
+                              state
+                            else
+                              HasEnded{bids=bids, expired=nextExpiry, opt=opt}
+                      HasEnded { } ->
+                          state
 
-addBid :: Bid -> State -> (State, Either Errors ())
-addBid bid state = 
-                let now = at bid in
-                let auctionId = auction bid in
-                let bidAmount = amount bid in
-                case state of 
-                    AwaitingStart {start=start, startingExpiry=startingExpiry, opt=opt} ->
-                        case (now > start, now < startingExpiry) of 
-                            (True,True) -> 
-                                let nextExpiry = max startingExpiry (now + (timeFrame opt)) in
-                                (OnGoing{bids=[bid], nextExpiry=nextExpiry, opt=opt}, Right ())
-                            (True, False) -> (HasEnded{bids=[],expired=startingExpiry, opt=opt}, Right ())
-                            _ -> (state,Left (AuctionHasEnded auctionId))
-                    OnGoing {bids=bids,nextExpiry=nextExpiry, opt=opt} ->
-                        if now<nextExpiry then
-                            case bids of
-                            [] -> 
-                                let nextExpiry = max nextExpiry (now + (timeFrame opt)) in
-                                (OnGoing { bids=bid:bids, nextExpiry=nextExpiry, opt=opt}, Right())
-                            highestBid:xs -> 
-                                -- you cannot bid lower than the "current bid"
-                                let highestBidAmount = amount highestBid in
-                                let nextExpiry = max nextExpiry (now + (timeFrame opt)) in
-                                let minRaiseAmount = minRaise opt in
-                                if bidAmount > (amountAdd highestBidAmount minRaiseAmount) then
-                                    (OnGoing { bids=bid:bids, nextExpiry=nextExpiry, opt=opt}, Right())
-                                else 
-                                    (state, (Left (MustPlaceBidOverHighestBid highestBidAmount)))
-                        else
-                            (HasEnded{bids=bids, expired=nextExpiry, opt=opt}, Left (AuctionHasEnded auctionId))
-                    HasEnded { } ->
-                        (state, Left (AuctionHasEnded auctionId))
+  -- addBid :: Bid -> State -> (State, Either Errors ())
+  addBid bid state = 
+                  let now = at bid in
+                  let auctionId = auction bid in
+                  let bidAmount = amount bid in
+                  case state of 
+                      AwaitingStart {start=start, startingExpiry=startingExpiry, opt=opt} ->
+                          case (now > start, now < startingExpiry) of 
+                              (True,True) -> 
+                                  let nextExpiry = max startingExpiry (now + timeFrame opt) in
+                                  (OnGoing{bids=[bid], nextExpiry=nextExpiry, opt=opt}, Right ())
+                              (True, False) -> (HasEnded{bids=[],expired=startingExpiry, opt=opt}, Right ())
+                              _ -> (state,Left (AuctionHasEnded auctionId))
+                      OnGoing {bids=bids,nextExpiry=nextExpiry, opt=opt} ->
+                          if now<nextExpiry then
+                              case bids of
+                              [] -> 
+                                  let nextExpiry = max nextExpiry (now + timeFrame opt) in
+                                  (OnGoing { bids=bid:bids, nextExpiry=nextExpiry, opt=opt}, Right())
+                              highestBid:xs -> 
+                                  -- you cannot bid lower than the "current bid"
+                                  let highestBidAmount = amount highestBid in
+                                  let nextExpiry = max nextExpiry (now + timeFrame opt) in
+                                  let minRaiseAmount = minRaise opt in
+                                  if bidAmount > amountAdd highestBidAmount minRaiseAmount then
+                                      (OnGoing { bids=bid:bids, nextExpiry=nextExpiry, opt=opt}, Right())
+                                  else 
+                                      (state, Left (MustPlaceBidOverHighestBid highestBidAmount))
+                          else
+                              (HasEnded{bids=bids, expired=nextExpiry, opt=opt}, Left (AuctionHasEnded auctionId))
+                      HasEnded { } ->
+                          (state, Left (AuctionHasEnded auctionId))
 

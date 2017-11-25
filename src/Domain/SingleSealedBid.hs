@@ -19,31 +19,33 @@ data State =
   AcceptingBids { bidsMap:: Map.Map UserId Bid, expiry:: DateTime, opt::Options }
   | DisclosingBids { bids:: [Bid], expired:: DateTime , opt::Options }
 
-inc :: DateTime -> State -> State
-inc now state = case state of 
-         AcceptingBids { bidsMap=bids,expiry=expiry,opt=opt }-> 
-           case now>=expiry of
-           False -> state
-           True -> 
-            let bs = Map.toList bids in
-            let bids= List.map snd bs in
-            DisclosingBids { bids=bids, expired=expiry, opt=opt}
-         DisclosingBids {}-> state
-
-addBid :: Bid -> State -> (State, Either Errors ())
-addBid bid state = 
-        let auctionId= auction bid in
-        let user= bidder bid in
-        case state of 
-         AcceptingBids { bidsMap=bids,expiry=expiry,opt=opt }-> 
-           case (at bid>=expiry, Map.member user bids ) of
-           (False,True) -> 
-            (state, Left AlreadyPlacedBid)
-           (False,False) -> 
-            (AcceptingBids { bidsMap=Map.insert user bid bids, expiry=expiry, opt=opt }, Right ())
-           (True,_) -> 
-            let bs = Map.toList bids in
-            let bids= List.map snd bs in
-            (DisclosingBids { bids=bids, expired=expiry, opt=opt},Left (AuctionHasEnded auctionId))
-
-         DisclosingBids {}-> (state,Left (AuctionHasEnded auctionId))
+instance Domain.Prelude.State Domain.SingleSealedBid.State where
+  -- inc :: DateTime -> S -> S
+  inc now state = case state of 
+           AcceptingBids { bidsMap=bids,expiry=expiry,opt=opt }-> 
+            if now>=expiry then
+              let bs = Map.toList bids in
+              let bids= List.map snd bs in
+              DisclosingBids { bids=bids, expired=expiry, opt=opt}
+            else
+              state
+           DisclosingBids {}-> state
+  
+  -- addBid :: Bid -> State -> (State, Either Errors ())
+  addBid bid state = 
+          let auctionId= auction bid in
+          let user= bidder bid in
+          case state of 
+           AcceptingBids { bidsMap=bids,expiry=expiry,opt=opt }-> 
+             case (at bid>=expiry, Map.member user bids ) of
+             (False,True) -> 
+              (state, Left AlreadyPlacedBid)
+             (False,False) -> 
+              (AcceptingBids { bidsMap=Map.insert user bid bids, expiry=expiry, opt=opt }, Right ())
+             (True,_) -> 
+              let bs = Map.toList bids in
+              let bids= List.map snd bs in
+              (DisclosingBids { bids=bids, expired=expiry, opt=opt},Left (AuctionHasEnded auctionId))
+  
+           DisclosingBids {}-> (state,Left (AuctionHasEnded auctionId))
+  

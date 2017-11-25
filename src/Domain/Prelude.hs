@@ -32,3 +32,7 @@ data Errors =
   | InvalidUserData String
   | MustPlaceBidOverHighestBid Amount
   | AlreadyPlacedBid
+
+class State a where
+  inc :: DateTime -> a -> a
+  addBid :: Bid -> a -> (a, Either Errors ())
