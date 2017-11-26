@@ -5,6 +5,7 @@ import qualified Data.Map as Map
 import qualified Data.List as List
 import qualified Domain.States as S
 import qualified Either as E
+import Data.Either
 import Domain.Prelude
 import Domain.Auctions
 import Domain.Bids
@@ -49,11 +50,18 @@ handle state r =
   PlaceBid time bid ->
     let aId = forAuction bid in
     case Map.lookup aId r of
-    Just (auction,state) -> 
-      let v = validateBid bid auction in
-      let (next, v2)= addBid bid state in
-      let newR= Map.insert aId (auction, next) r in
-      (r, Left (UnknownAuction aId))
+    Just (auction,state) ->
+      case validateBid bid auction of
+      Right () ->
+        let (next, res)= addBid bid state in
+        let newR= Map.insert aId (auction, next) r in
+        case res of
+        Right _ ->
+          (newR, Right (BidAccepted time bid))
+        Left err->
+          (r, Left err)
+      Left err ->
+        (r, Left err)
     Nothing -> 
       (r, Left (UnknownAuction aId))
 
