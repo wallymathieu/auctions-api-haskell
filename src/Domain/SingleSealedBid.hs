@@ -2,8 +2,8 @@
 module Domain.SingleSealedBid where
 import Money
 import Domain.Prelude
-import Domain.State
-import Domain.Bid
+import qualified Domain.States as S
+import Domain.Bids
 import qualified Data.Map as Map
 import qualified Data.List as List
 import GHC.Generics
@@ -21,36 +21,54 @@ data Options =
   |Vickrey deriving (Generic, Show)
 
 data State =
-  AcceptingBids { bidsMap:: Map.Map UserId Bid, expiry:: UTCTime, opt::Options }
+  AcceptingBids { bidsMap:: Map.Map UserId Bid, firstExpiry:: UTCTime, opt::Options }
   | DisclosingBids { bids:: [Bid], expired:: UTCTime , opt::Options }
-  
-instance Domain.State.State Domain.SingleSealedBid.State where
-  -- inc :: DateTime -> S -> S
+
+emptyState :: UTCTime -> Options -> State
+emptyState expiry opt=AcceptingBids{ bidsMap= Map.empty, firstExpiry= expiry, opt= opt}
+
+instance S.State State where
   inc now state = case state of
-           AcceptingBids { bidsMap=bids,expiry=expiry,opt=opt }-> 
+           AcceptingBids { bidsMap=bids, firstExpiry=expiry, opt=opt }-> 
             if now>=expiry then
-              let bs = Map.toList bids in
-              let bids= List.map snd bs in
-              DisclosingBids { bids=bids, expired=expiry, opt=opt}
+              DisclosingBids { bids=Map.elems bids, expired=expiry, opt=opt}
             else
               state
            DisclosingBids {}-> state
-  
-  -- addBid :: Bid -> State -> (State, Either Errors ())
+
   addBid bid state = 
-          let auctionId= auction bid in
+          let auctionId= forAuction bid in
           let user= bidder bid in
           case state of
-           AcceptingBids { bidsMap=bids,expiry=expiry,opt=opt }-> 
+           AcceptingBids { bidsMap=bids, firstExpiry=expiry, opt=opt }-> 
              case (at bid>=expiry, Map.member user bids ) of
              (False,True) ->
               (state, Left AlreadyPlacedBid)
              (False,False) ->
-              (AcceptingBids { bidsMap=Map.insert user bid bids, expiry=expiry, opt=opt }, Right ())
+              (AcceptingBids { bidsMap=Map.insert user bid bids, firstExpiry=expiry, opt=opt }, Right ())
              (True,_) ->
-              let bs = Map.toList bids in
-              let bids= List.map snd bs in
-              (DisclosingBids { bids=bids, expired=expiry, opt=opt},Left (AuctionHasEnded auctionId))
+              (DisclosingBids { bids=Map.elems bids, expired=expiry, opt=opt},Left (AuctionHasEnded auctionId))
   
            DisclosingBids {}-> (state,Left (AuctionHasEnded auctionId))
+  
+  getBids state = 
+    case state of
+      AcceptingBids { bidsMap=bids }-> Map.elems bids
+      DisclosingBids { bids=bids} -> bids
+
+  tryGetAmountAndWinner state = 
+    case state of
+      AcceptingBids { } -> Nothing
+      DisclosingBids { bids= highestBid : (secondHighest : _), 
+                       opt=Vickrey } -> Just (bidAmount secondHighest, bidder highestBid)
+      DisclosingBids { bids= [highestBid],
+                       opt=Vickrey} -> Just (bidAmount highestBid, bidder highestBid)
+      DisclosingBids { bids= highestBid : _,
+                       opt=Blind} -> Just (bidAmount highestBid, bidder highestBid)
+      _ -> Nothing
+
+  hasEnded state = 
+    case state of
+      AcceptingBids { }-> False
+      DisclosingBids { } -> True
   

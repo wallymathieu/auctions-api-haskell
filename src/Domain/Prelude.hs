@@ -1,10 +1,10 @@
 module Domain.Prelude where
 
 import Money
+import Data.Time
+
 type UserId = String
-
 type BidId = String
-
 type AuctionId = Integer
 
 data Errors = 

@@ -3,8 +3,8 @@ import Data.Aeson
 
 import qualified Money as M
 import qualified Domain.Prelude as DP
-import qualified Domain.Auction as A
-import qualified Domain.Bid as B
+import qualified Domain.Auctions as A
+import qualified Domain.Bids as B
 import qualified Domain.Commands as C
 import qualified Domain.SingleSealedBid as DS
 import qualified Domain.TimedAscending as DT

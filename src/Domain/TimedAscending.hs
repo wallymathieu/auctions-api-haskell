@@ -2,8 +2,8 @@
 module Domain.TimedAscending where
 import Money
 import Domain.Prelude
-import Domain.State
-import Domain.Bid
+import qualified Domain.States as S
+import Domain.Bids
 import GHC.Generics
 import Data.Time
 
@@ -21,14 +21,16 @@ data Options = Options {
   timeFrame:: NominalDiffTime
 } deriving (Generic, Show)
 
-
 data State =
   AwaitingStart { start:: UTCTime , startingExpiry:: UTCTime , opt::Options }
   | OnGoing { bids:: [Bid] , nextExpiry:: UTCTime , opt::Options }
   | HasEnded { bids:: [Bid] , expired:: UTCTime , opt::Options }
 
-instance Domain.State.State Domain.TimedAscending.State where
-  -- inc :: DateTime -> State -> State
+emptyState :: UTCTime -> UTCTime -> Options -> State
+emptyState startsAt expiry opt=AwaitingStart{ start=startsAt, startingExpiry= expiry, opt= opt}
+  
+instance S.State Domain.TimedAscending.State where
+
   inc now state = case state of 
                       AwaitingStart {start=start, startingExpiry=startingExpiry, opt=opt} ->
                           case (now > start, now < startingExpiry) of 
@@ -43,11 +45,10 @@ instance Domain.State.State Domain.TimedAscending.State where
                       HasEnded { } ->
                           state
 
-  -- addBid :: Bid -> State -> (State, Either Errors ())
   addBid bid state = 
                   let now = at bid in
-                  let auctionId = auction bid in
-                  let bidAmount = amount bid in
+                  let auctionId = forAuction bid in
+                  let bAmount = bidAmount bid in
                   case state of 
                       AwaitingStart {start=start, startingExpiry=startingExpiry, opt=opt} ->
                           case (now > start, now < startingExpiry) of 
@@ -64,10 +65,10 @@ instance Domain.State.State Domain.TimedAscending.State where
                                   (OnGoing { bids=bid:bids, nextExpiry=nextExpiry, opt=opt}, Right())
                               highestBid:xs -> 
                                   -- you cannot bid lower than the "current bid"
-                                  let highestBidAmount = amount highestBid in
+                                  let highestBidAmount = bidAmount highestBid in
                                   let nextExpiry = max nextExpiry (addUTCTime (timeFrame opt) now) in
                                   let minRaiseAmount = minRaise opt in
-                                  if bidAmount > amountAdd highestBidAmount minRaiseAmount then
+                                  if bAmount > amountAdd highestBidAmount minRaiseAmount then
                                       (OnGoing { bids=bid:bids, nextExpiry=nextExpiry, opt=opt}, Right())
                                   else 
                                       (state, Left (MustPlaceBidOverHighestBid highestBidAmount))
@@ -75,3 +76,23 @@ instance Domain.State.State Domain.TimedAscending.State where
                               (HasEnded{bids=bids, expired=nextExpiry, opt=opt}, Left (AuctionHasEnded auctionId))
                       HasEnded { } ->
                           (state, Left (AuctionHasEnded auctionId))
+
+  tryGetAmountAndWinner state = 
+    case state of
+    HasEnded {bids=bid:rest,expired=expired, opt=opt} -> 
+      if reservePrice opt < bidAmount bid then
+        Just (bidAmount bid, bidder bid)
+      else
+        Nothing
+    _ -> Nothing
+
+  getBids state=
+    case state of
+    OnGoing {bids=bids}->bids
+    HasEnded {bids=bids}->bids
+    AwaitingStart {} ->[]
+
+  hasEnded state=
+    case state of
+    HasEnded {} -> True 
+    _ -> False
