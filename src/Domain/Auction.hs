@@ -6,6 +6,7 @@ import Domain.Prelude
 import Domain.TimedAscending as TimedAscending
 import Domain.SingleSealedBid as SingleSealedBid
 import GHC.Generics
+import Data.Time
 
 data AuctionType=
   {- also known as an open ascending price auction
@@ -15,10 +16,10 @@ data AuctionType=
   deriving (Generic, Show)
   
 data Auction = Auction { auctionId :: AuctionId,
-  startsAt :: DateTime,
+  startsAt :: UTCTime,
   title :: String,
   -- initial expiry
-  expiry :: DateTime,
+  expiry :: UTCTime,
   seller :: UserId,
   typ :: AuctionType,
   currency :: Currency

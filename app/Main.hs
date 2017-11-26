@@ -29,9 +29,9 @@ instance FromJSON BidReq
 
 data AddAuctionReq = AddAuctionReq {
   id :: DP.AuctionId,
-  startsAt :: DP.DateTime,
+  startsAt :: P.String,
   title :: P.String,
-  endsAt :: DP.DateTime,
+  endsAt :: P.String,
   currency :: P.String,
   typ:: P.String
 } deriving (Generic, P.Show)
@@ -51,7 +51,7 @@ main = do
 app :: Api
 app = do
   get "auction-req" P.$ do
-    json P.$ AddAuctionReq { id = 1, startsAt = 25, title= "title", endsAt=25, currency="SEK", typ="" }
+    json P.$ AddAuctionReq { id = 1, startsAt = "2017-1-1", title= "title", endsAt="2018-1-1", currency="SEK", typ="" }
   post "auction" P.$ do
     auction1 <- jsonBody' :: ApiAction AddAuctionReq
     text P.$ "Parsed: " <> pack (P.show auction1)

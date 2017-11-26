@@ -5,6 +5,7 @@ import Domain.Prelude
 import Domain.State
 import Domain.Bid
 import GHC.Generics
+import Data.Time
 
 data Options = Options { 
   {- the seller has set a minimum sale price in advance (the 'reserve' price) 
@@ -17,14 +18,14 @@ data Options = Options {
   {- If no competing bidder challenges the standing bid within a given time frame, 
      the standing bid becomes the winner, and the item is sold to the highest bidder 
      at a price equal to his or her bid. -}
-  timeFrame:: TimeSpan
+  timeFrame:: NominalDiffTime
 } deriving (Generic, Show)
 
 
 data State =
-  AwaitingStart { start:: DateTime , startingExpiry:: DateTime , opt::Options }
-  | OnGoing { bids:: [Bid] , nextExpiry:: DateTime , opt::Options }
-  | HasEnded { bids:: [Bid] , expired:: DateTime , opt::Options }
+  AwaitingStart { start:: UTCTime , startingExpiry:: UTCTime , opt::Options }
+  | OnGoing { bids:: [Bid] , nextExpiry:: UTCTime , opt::Options }
+  | HasEnded { bids:: [Bid] , expired:: UTCTime , opt::Options }
 
 instance Domain.State.State Domain.TimedAscending.State where
   -- inc :: DateTime -> State -> State
@@ -51,7 +52,7 @@ instance Domain.State.State Domain.TimedAscending.State where
                       AwaitingStart {start=start, startingExpiry=startingExpiry, opt=opt} ->
                           case (now > start, now < startingExpiry) of 
                               (True,True) -> 
-                                  let nextExpiry = max startingExpiry (now + timeFrame opt) in
+                                  let nextExpiry = max startingExpiry (addUTCTime (timeFrame opt) now) in
                                   (OnGoing{bids=[bid], nextExpiry=nextExpiry, opt=opt}, Right ())
                               (True, False) -> (HasEnded{bids=[],expired=startingExpiry, opt=opt}, Right ())
                               _ -> (state,Left (AuctionHasEnded auctionId))
@@ -59,12 +60,12 @@ instance Domain.State.State Domain.TimedAscending.State where
                           if now<nextExpiry then
                               case bids of
                               [] -> 
-                                  let nextExpiry = max nextExpiry (now + timeFrame opt) in
+                                  let nextExpiry = max nextExpiry (addUTCTime (timeFrame opt) now) in
                                   (OnGoing { bids=bid:bids, nextExpiry=nextExpiry, opt=opt}, Right())
                               highestBid:xs -> 
                                   -- you cannot bid lower than the "current bid"
                                   let highestBidAmount = amount highestBid in
-                                  let nextExpiry = max nextExpiry (now + timeFrame opt) in
+                                  let nextExpiry = max nextExpiry (addUTCTime (timeFrame opt) now) in
                                   let minRaiseAmount = minRaise opt in
                                   if bidAmount > amountAdd highestBidAmount minRaiseAmount then
                                       (OnGoing { bids=bid:bids, nextExpiry=nextExpiry, opt=opt}, Right())

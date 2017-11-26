@@ -7,6 +7,7 @@ import Domain.Bid
 import qualified Data.Map as Map
 import qualified Data.List as List
 import GHC.Generics
+import Data.Time
 
 data Options =
   {- Sealed first-price auction 
@@ -20,8 +21,8 @@ data Options =
   |Vickrey deriving (Generic, Show)
 
 data State =
-  AcceptingBids { bidsMap:: Map.Map UserId Bid, expiry:: DateTime, opt::Options }
-  | DisclosingBids { bids:: [Bid], expired:: DateTime , opt::Options }
+  AcceptingBids { bidsMap:: Map.Map UserId Bid, expiry:: UTCTime, opt::Options }
+  | DisclosingBids { bids:: [Bid], expired:: UTCTime , opt::Options }
   
 instance Domain.State.State Domain.SingleSealedBid.State where
   -- inc :: DateTime -> S -> S

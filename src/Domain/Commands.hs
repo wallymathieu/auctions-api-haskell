@@ -5,14 +5,15 @@ import Domain.Prelude
 import Domain.Auction
 import Domain.Bid
 import GHC.Generics
+import Data.Time
 
 data Command = 
-  AddAuction DateTime Auction
-  | PlaceBid DateTime Bid
+  AddAuction UTCTime Auction
+  | PlaceBid UTCTime Bid
   deriving (Generic, Show)
 
 
 data CommandSuccess = 
-  AuctionAdded DateTime Auction
-  | BidAccepted DateTime Bid
+  AuctionAdded UTCTime Auction
+  | BidAccepted UTCTime Bid
   deriving (Generic, Show)

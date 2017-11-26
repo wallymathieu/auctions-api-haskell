@@ -7,11 +7,6 @@ type BidId = String
 
 type AuctionId = Integer
 
--- milliseconds to begin with
-type TimeSpan = Integer 
--- milliseconds to begin with
-type DateTime = Integer
-
 data Errors = 
   UnknownAuction AuctionId
   | UnknownBid BidId
