@@ -8,7 +8,7 @@ import Domain.Auctions
 import Domain.Bids
 import Domain.Commands
 import Domain.States
-  
+
 type Repository = Map.Map AuctionId (Auction, AuctionState)
 
 auctions::Repository -> [Auction]
@@ -33,7 +33,7 @@ handle state r =
       Right () ->
         let (next, res)= addBid bid state in
         let newR= Map.insert aId (auction, next) r in
-        fmap ( \ () -> (newR, BidAccepted time bid) ) res
+          fmap ( \ () -> (newR, BidAccepted time bid) ) res
       Left err ->
         Left err
     Nothing -> 

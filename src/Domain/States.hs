@@ -2,6 +2,7 @@ module Domain.States where
 import Domain.Prelude
 import Domain.Bids
 import Data.Time
+import Data.Bifunctor
 import Money
 import qualified Either as E
 
@@ -13,17 +14,25 @@ class State a where
   hasEnded:: a -> Bool
 
 instance (State a , State b) => (State (Either a b)) where
-  inc now = E.mapBoth (inc now) (inc now)
+  inc now = bimap (inc now) (inc now)
 
   addBid bid state =
-    let res = E.mapBoth (addBid bid) (addBid bid) state in 
-      E.splitFstJoinSnd res
+    {- 
+    split a tuple of (Either (a,b) (c,b)) where the second element is of the same type into
+    ((Either a c),b)
+    -}
+    let splitFstJoinSnd c = case c of
+                            (Left (a,b)) -> (Left a, b)
+                            (Right (a,b)) -> (Right a, b) in
+    
+    let res = bimap (addBid bid) (addBid bid) state in 
+      splitFstJoinSnd res
   getBids state=
-    let res = E.mapBoth getBids getBids state in
+    let res = bimap getBids getBids state in
       E.join res
   tryGetAmountAndWinner state=
-    let res = E.mapBoth tryGetAmountAndWinner tryGetAmountAndWinner state in
+    let res = bimap tryGetAmountAndWinner tryGetAmountAndWinner state in
       E.join res
   hasEnded state=
-    let res = E.mapBoth hasEnded hasEnded state in
+    let res = bimap hasEnded hasEnded state in
       E.join res
