@@ -36,7 +36,7 @@ type Repository = Map.Map AuctionId (Auction, AuctionState)
 auctions::Repository -> [Auction]
 auctions r = List.map fst (Map.elems r)
 
-handle:: Command -> Repository -> (Either Errors (Repository,CommandSuccess))
+handle:: Command -> Repository -> Either Errors (Repository,CommandSuccess)
 handle state r =
   case state of 
   AddAuction time auction ->
@@ -55,7 +55,7 @@ handle state r =
       Right () ->
         let (next, res)= addBid bid state in
         let newR= Map.insert aId (auction, next) r in
-        fmap ( \ () -> (newR, (BidAccepted time bid)) ) res
+        fmap ( \ () -> (newR, BidAccepted time bid) ) res
       Left err ->
         Left err
     Nothing -> 
