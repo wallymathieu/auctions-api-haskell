@@ -13,6 +13,7 @@ class State a where
   tryGetAmountAndWinner:: a -> Maybe (Amount , UserId)
   hasEnded:: a -> Bool
 
+-- composing two State types as a State by using Either
 instance (State a , State b) => (State (Either a b)) where
   inc now = bimap (inc now) (inc now)
 
