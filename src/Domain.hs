@@ -1,9 +1,6 @@
-{-# LANGUAGE TypeSynonymInstances  #-}
-{-# LANGUAGE FlexibleInstances  #-}
 module Domain where
 import qualified Data.Map as Map
 import qualified Data.List as List
-import qualified Domain.States as S
 import qualified Either as E
 import Data.Either
 import Domain.Prelude
@@ -11,25 +8,6 @@ import Domain.Auctions
 import Domain.Bids
 import Domain.Commands
 import Domain.States
-import qualified Domain.SingleSealedBid as SingleSealedBid
-import qualified Domain.TimedAscending as TimedAscending
-
-instance S.State AuctionState where
-  inc now = E.mapBoth (S.inc now) (S.inc now)
-
-  addBid bid state =
-    let res = E.mapBoth (S.addBid bid) (S.addBid bid) state in 
-      E.splitFstJoinSnd res
-  getBids state=
-    let res = E.mapBoth S.getBids S.getBids state in
-      E.join res
-  tryGetAmountAndWinner state=
-    let res = E.mapBoth S.tryGetAmountAndWinner S.tryGetAmountAndWinner state in
-      E.join res
-  hasEnded state=
-    let res = E.mapBoth S.hasEnded S.hasEnded state in
-      E.join res
-
   
 type Repository = Map.Map AuctionId (Auction, AuctionState)
 
