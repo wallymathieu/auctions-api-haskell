@@ -1,5 +1,5 @@
 {-# LANGUAGE DeriveGeneric     #-}
-module Domain.Bids where
+module Domain.Bids (module Domain.Bids) where
 import Money
 import Domain.Prelude
 import GHC.Generics

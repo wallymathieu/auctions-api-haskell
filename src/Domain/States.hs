@@ -1,4 +1,4 @@
-module Domain.States where
+module Domain.States (module Domain.States) where
 import Domain.Prelude
 import Domain.Bids
 import Data.Time

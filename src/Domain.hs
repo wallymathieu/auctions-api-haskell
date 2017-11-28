@@ -1,4 +1,11 @@
-module Domain where
+module Domain (
+  module Domain,
+  module Domain.Prelude,
+  module Domain.Auctions,
+  module Domain.Bids,
+  module Domain.Commands,
+  module Domain.States
+) where
 import qualified Data.Map as Map
 import qualified Data.List as List
 import qualified Either as E
@@ -29,13 +36,11 @@ handle state r =
     let aId = forAuction bid in
     case Map.lookup aId r of
     Just (auction,state) ->
-      case validateBid bid auction of
-      Right () ->
+      validateBid bid auction >>= (\()->
         let (next, res)= addBid bid state in
         let newR= Map.insert aId (auction, next) r in
-          fmap ( \ () -> (newR, BidAccepted time bid) ) res
-      Left err ->
-        Left err
+          fmap (\() -> (newR, BidAccepted time bid) ) res
+      )
     Nothing -> 
       Left (UnknownAuction aId)
 

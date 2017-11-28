@@ -1,4 +1,4 @@
-module Domain.Prelude where
+module Domain.Prelude (module Domain.Prelude) where
 
 import Money
 import Data.Time
@@ -17,6 +17,7 @@ data Errors =
   | AuctionNotFound AuctionId
   | SellerCannotPlaceBids (UserId , AuctionId)
   | BidCurrencyConversion (BidId , Currency)
+  | CurrencyConversion
   | InvalidUserData String
   | MustPlaceBidOverHighestBid Amount
   | AlreadyPlacedBid

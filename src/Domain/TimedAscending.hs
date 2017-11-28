@@ -1,5 +1,5 @@
 {-# LANGUAGE DeriveGeneric     #-}
-module Domain.TimedAscending where
+module Domain.TimedAscending (module Domain.TimedAscending) where
 import Money
 import Domain.Prelude
 import qualified Domain.States as S

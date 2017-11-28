@@ -1,5 +1,5 @@
 {-# LANGUAGE DeriveGeneric     #-}
-module Domain.SingleSealedBid where
+module Domain.SingleSealedBid (module Domain.SingleSealedBid) where
 import Money
 import Domain.Prelude
 import qualified Domain.States as S

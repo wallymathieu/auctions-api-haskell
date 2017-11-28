@@ -1,5 +1,5 @@
 {-# LANGUAGE DeriveGeneric  #-}
-module Domain.Auctions where
+module Domain.Auctions (module Domain.Auctions) where
 
 import Money
 import Domain.Prelude
