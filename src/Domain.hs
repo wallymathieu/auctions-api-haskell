@@ -39,7 +39,7 @@ handle state r =
       validateBid bid auction >>= (\()->
         let (next, res)= addBid bid state in
         let newR= Map.insert aId (auction, next) r in
-          fmap (\() -> (newR, BidAccepted time bid) ) res
+          res >>= (\() -> Right (newR, BidAccepted time bid) )
       )
     Nothing -> 
       Left (UnknownAuction aId)

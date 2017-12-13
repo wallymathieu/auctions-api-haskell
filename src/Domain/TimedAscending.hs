@@ -23,8 +23,8 @@ data Options = Options {
 
 data State =
   AwaitingStart { start:: UTCTime , startingExpiry:: UTCTime , opt::Options }
-  | OnGoing { bids:: [Bid] , nextExpiry:: UTCTime , opt::Options }
-  | HasEnded { bids:: [Bid] , expired:: UTCTime , opt::Options }
+  | OnGoing  [Bid] UTCTime Options
+  | HasEnded [Bid] UTCTime Options
 
 emptyState :: UTCTime -> UTCTime -> Options -> State
 emptyState startsAt expiry opt=AwaitingStart{ start=startsAt, startingExpiry= expiry, opt= opt}
@@ -34,14 +34,14 @@ instance S.State Domain.TimedAscending.State where
   inc now state = case state of 
                       AwaitingStart {start=start, startingExpiry=startingExpiry, opt=opt} ->
                           case (now > start, now < startingExpiry) of 
-                              (True,True) -> OnGoing{bids=[],nextExpiry=startingExpiry, opt=opt}
-                              (True, False) -> HasEnded{bids=[],expired=startingExpiry, opt=opt}
+                              (True,True) -> OnGoing [] startingExpiry opt
+                              (True, False) -> HasEnded [] startingExpiry opt
                               _ -> state
-                      OnGoing {bids=bids,nextExpiry=nextExpiry, opt=opt} ->
+                      OnGoing bids nextExpiry opt ->
                           if now<nextExpiry then
                               state
                             else
-                              HasEnded{bids=bids, expired=nextExpiry, opt=opt}
+                              HasEnded bids nextExpiry opt
                       HasEnded { } ->
                           state
 
@@ -54,32 +54,32 @@ instance S.State Domain.TimedAscending.State where
                           case (now > start, now < startingExpiry) of 
                               (True,True) -> 
                                   let nextExpiry = max startingExpiry (addUTCTime (timeFrame opt) now) in
-                                  (OnGoing{bids=[bid], nextExpiry=nextExpiry, opt=opt}, Right ())
-                              (True, False) -> (HasEnded{bids=[],expired=startingExpiry, opt=opt}, Right ())
+                                  (OnGoing [bid] nextExpiry opt, Right ())
+                              (True, False) -> (HasEnded [] startingExpiry opt, Right ())
                               _ -> (state,Left (AuctionHasEnded auctionId))
-                      OnGoing {bids=bids,nextExpiry=nextExpiry, opt=opt} ->
+                      OnGoing bids nextExpiry opt ->
                           if now<nextExpiry then
                               case bids of
                               [] -> 
                                   let nextExpiry = max nextExpiry (addUTCTime (timeFrame opt) now) in
-                                  (OnGoing { bids=bid:bids, nextExpiry=nextExpiry, opt=opt}, Right())
+                                  (OnGoing (bid:bids) nextExpiry opt, Right())
                               highestBid:xs -> 
                                   -- you cannot bid lower than the "current bid"
                                   let highestBidAmount = bidAmount highestBid in
                                   let nextExpiry = max nextExpiry (addUTCTime (timeFrame opt) now) in
                                   let minRaiseAmount = minRaise opt in
                                   if bAmount > amountAdd highestBidAmount minRaiseAmount then
-                                      (OnGoing { bids=bid:bids, nextExpiry=nextExpiry, opt=opt}, Right())
+                                      (OnGoing (bid:bids) nextExpiry opt, Right())
                                   else 
                                       (state, Left (MustPlaceBidOverHighestBid highestBidAmount))
                           else
-                              (HasEnded{bids=bids, expired=nextExpiry, opt=opt}, Left (AuctionHasEnded auctionId))
+                              (HasEnded bids nextExpiry opt, Left (AuctionHasEnded auctionId))
                       HasEnded { } ->
                           (state, Left (AuctionHasEnded auctionId))
 
   tryGetAmountAndWinner state = 
     case state of
-    HasEnded {bids=bid:rest,expired=expired, opt=opt} -> 
+    HasEnded (bid:rest) expired opt -> 
       if reservePrice opt < bidAmount bid then
         Just (bidAmount bid, bidder bid)
       else
@@ -88,8 +88,8 @@ instance S.State Domain.TimedAscending.State where
 
   getBids state=
     case state of
-    OnGoing {bids=bids}->bids
-    HasEnded {bids=bids}->bids
+    OnGoing bids _ _ -> bids
+    HasEnded bids _ _ -> bids
     AwaitingStart {} ->[]
 
   hasEnded state=
