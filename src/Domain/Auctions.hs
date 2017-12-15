@@ -8,7 +8,7 @@ import qualified Domain.TimedAscending as TA
 import qualified Domain.SingleSealedBid as SB
 import GHC.Generics
 import Data.Time
-import Data.Either
+import Data.Aeson
 
 data AuctionType=
   {- also known as an open ascending price auction
@@ -43,3 +43,9 @@ emptyState a =
   SingleSealedBid opt -> Left (SB.emptyState (expiry a) opt)
   TimedAscending opt -> Right (TA.emptyState (startsAt a) (expiry a) opt)
 
+
+
+instance ToJSON AuctionType
+instance FromJSON AuctionType
+instance ToJSON Auction
+instance FromJSON Auction

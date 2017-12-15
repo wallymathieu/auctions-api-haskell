@@ -1,4 +1,3 @@
-import SampleData
 import qualified AuctionStateSpec as AS
 import Test.Hspec
 

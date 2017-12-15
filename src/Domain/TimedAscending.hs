@@ -6,7 +6,7 @@ import qualified Domain.States as S
 import Domain.Bids
 import GHC.Generics
 import Data.Time
-import Debug.Trace
+import Data.Aeson
 
 data Options = Options { 
   {- the seller has set a minimum sale price in advance (the 'reserve' price) 
@@ -26,77 +26,77 @@ defaultOptions:: Currency->Options
 defaultOptions c = Options { reservePrice =Amount c 0, minRaise =Amount c 0, timeFrame = 0::NominalDiffTime }
 
 data State =
-  AwaitingStart { start:: UTCTime , startingExpiry:: UTCTime , opt::Options }
+  AwaitingStart UTCTime UTCTime Options 
   | OnGoing  [Bid] UTCTime Options
   | HasEnded [Bid] UTCTime Options
   deriving(Eq, Generic, Show)
 
 emptyState :: UTCTime -> UTCTime -> Options -> State
-emptyState startsAt expiry opt=AwaitingStart{ start=startsAt, startingExpiry= expiry, opt= opt}
+emptyState =AwaitingStart 
   
 instance S.State Domain.TimedAscending.State where
 
   inc now state = 
     case state of 
-        AwaitingStart {start=start, startingExpiry=startingExpiry, opt=opt} ->
-            case (now > start, now < startingExpiry) of 
-                (True,True) ->trace "inc: AwaitingStart -> OnGoing " OnGoing [] startingExpiry opt
-                (True, False) ->trace "inc: AwaitingStart -> HasEnded " HasEnded [] startingExpiry opt
-                _ -> trace "inc: AwaitingStart -> AwaitingStart"
-                  state
-        OnGoing bids nextExpiry opt ->
-            if now<nextExpiry then
-                trace "inc: OnGoing -> OnGoing"
-                state
-              else
-                trace "inc: OnGoing -> HasEnded"
-                HasEnded bids nextExpiry opt
-        HasEnded {} ->
-          trace "inc: HasEnded -> HasEnded"
+      AwaitingStart start startingExpiry opt ->
+        case (now > start, now < startingExpiry) of 
+          (True,True) -> -- AwaitingStart -> OnGoing 
+            OnGoing [] startingExpiry opt
+          (True, False) -> -- AwaitingStart -> HasEnded 
+            HasEnded [] startingExpiry opt
+          _ -> -- AwaitingStart -> AwaitingStart
             state
+      OnGoing bids nextExpiry opt ->
+        if now<nextExpiry then -- OnGoing -> OnGoing
+          state
+        else -- OnGoing -> HasEnded
+          HasEnded bids nextExpiry opt
+      HasEnded {} ->
+        -- HasEnded -> HasEnded
+        state
 
   addBid bid state = 
     let now = at bid in
     let auctionId = forAuction bid in
     let bAmount = bidAmount bid in
     case state of 
-        AwaitingStart {start=start, startingExpiry=startingExpiry, opt=opt} ->
-            case (now > start, now < startingExpiry) of 
-                (True,True) -> 
-                    let nextExpiry = max startingExpiry (addUTCTime (timeFrame opt) now) in
-                    trace "addBid: AwaitingStart -> OnGoing B++"
-                    (OnGoing [bid] nextExpiry opt, Right ())
-                (True, False) -> (HasEnded [] startingExpiry opt, Right ())
-                _ -> trace "addBid: AwaitingStart -> AwaitingStart !"
-                  (state,Left (AuctionHasNotStarted auctionId))
+        AwaitingStart start startingExpiry opt ->
+          case (now > start, now < startingExpiry) of 
+            (True,True) -> 
+              let nextExpiry = max startingExpiry (addUTCTime (timeFrame opt) now) in
+              -- AwaitingStart -> OnGoing B++
+              (OnGoing [bid] nextExpiry opt, Right ())
+            (True, False) -> (HasEnded [] startingExpiry opt, Right ())
+            _ -> -- AwaitingStart -> AwaitingStart !
+              (state,Left (AuctionHasNotStarted auctionId))
         OnGoing bids nextExpiry opt ->
-            if now<nextExpiry then
-                case bids of
-                [] -> 
-                    let nextExpiry = max nextExpiry (addUTCTime (timeFrame opt) now) in
-                      trace "addBid: OnGoing -> OnGoing B++"
-                      (OnGoing (bid:bids) nextExpiry opt, Right())
-                highestBid:xs -> 
-                    -- you cannot bid lower than the "current bid"
-                    let highestBidAmount = bidAmount highestBid in
-                    let nextExpiry = max nextExpiry (addUTCTime (timeFrame opt) now) in
-                    let minRaiseAmount = minRaise opt in
-                    if bAmount > amountAdd highestBidAmount minRaiseAmount then
-                        trace "addBid: OnGoing -> OnGoing B++"
-                        (OnGoing (bid:bids) nextExpiry opt, Right())
-                    else 
-                      trace "addBid: OnGoing -> OnGoing !"
-                      (state, Left (MustPlaceBidOverHighestBid highestBidAmount))
-            else
-              trace "addBid: OnGoing -> HasEnded !"
-              (HasEnded bids nextExpiry opt, Left (AuctionHasEnded auctionId))
+          if now<nextExpiry then
+            case bids of
+            [] -> 
+              let nextExpiry' = max nextExpiry (addUTCTime (timeFrame opt) now) in
+                -- OnGoing -> OnGoing B++
+              (OnGoing (bid:bids) nextExpiry' opt, Right())
+            highestBid:_ -> 
+              -- you cannot bid lower than the "current bid"
+              let highestBidAmount = bidAmount highestBid in
+              let nextExpiry' = max nextExpiry (addUTCTime (timeFrame opt) now) in
+              let minRaiseAmount = minRaise opt in
+              if bAmount > amountAdd highestBidAmount minRaiseAmount then
+                -- OnGoing -> OnGoing B++
+                (OnGoing (bid:bids) nextExpiry' opt, Right())
+              else 
+                -- OnGoing -> OnGoing !
+                (state, Left (MustPlaceBidOverHighestBid highestBidAmount))
+          else
+            -- OnGoing -> HasEnded !
+            (HasEnded bids nextExpiry opt, Left (AuctionHasEnded auctionId))
         HasEnded { } ->
-          trace "addBid: HasEnded -> HasEnded !"
+          -- HasEnded -> HasEnded !
           (state, Left (AuctionHasEnded auctionId))
 
   tryGetAmountAndWinner state = 
     case state of
-    HasEnded (bid:rest) expired opt -> 
+    HasEnded (bid:_) _ opt -> 
       if reservePrice opt < bidAmount bid then
         Just (bidAmount bid, bidder bid)
       else
@@ -113,3 +113,7 @@ instance S.State Domain.TimedAscending.State where
     case state of
     HasEnded {} -> True 
     _ -> False
+
+instance ToJSON Options
+instance FromJSON Options
+    

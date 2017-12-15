@@ -2,40 +2,23 @@ module AuctionStateSpec where
 import Domain.Prelude
 import Domain.Auctions
 import Domain.Bids
-import SampleData
+import SampleData(sek,sampleAuctionId,sampleStartsAt,sampleEndsAt,sampleAuctionOfTyp,sampleBidTime)
 import Data.Time
 import Money
-import Data.Time.Clock
 import qualified Domain.States as S
 import qualified Domain.TimedAscending as TA
 import Test.Hspec
-import Debug.Trace
+--import Debug.Trace
 
-buyer1 = "x2_Buyer"::UserId
-buyer2 = "x3_Buyer"::UserId
-bid1= Bid { 
-  bidId= "baseless-leaf-olds-fade-sledsdebases"::BidId,
-  bidder = buyer1,
-  bidAmount = sek 10,
-  forAuction = sampleAuctionId,
-  at = addUTCTime (toEnum 1) sampleStartsAt
-}
 
-bid2= Bid { 
-  bidId= "doesbead-olds-base-ease-addedblesses"::BidId,
-  bidder = buyer1,
-  bidAmount = sek 12,
-  forAuction = sampleAuctionId,
-  at = addUTCTime (toEnum 2) sampleStartsAt
-}
-
+{-
 addBidsToState state=
-  let (s, e) = S.addBid bid1 state in 
-  let (s2, e2) = S.addBid bid2 s in
+  let (s, e) = S.addBid (bid1()) state in 
+  let (s2, e2) = S.addBid (bid2()) s in
   trace ("addBidsToState 1:"++show s)
   trace ("addBidsToState 2:"++show s2)
   s2
-
+-}
 -- let's start out with english auctions
 
     {-it "returns the first element of an *arbitrary* list" $
@@ -44,10 +27,28 @@ addBidsToState state=
     it "throws an exception if used with an empty list" $ do
       evaluate (head []) `shouldThrow` anyException
       -}
+spec:: ()->SpecWith ()
+spec ()=do
+  let buyer1 = "x2_Buyer"::UserId
+  let buyer2 = "x3_Buyer"::UserId
+  let bid1 =  Bid { 
+    bidId= "baseless-leaf-olds-fade-sledsdebases"::BidId,
+    bidder = buyer1,
+    bidAmount = sek 10,
+    forAuction = sampleAuctionId,
+    at = addUTCTime (toEnum 1) sampleStartsAt
+  }
   
-spec ()=
-  let timedAscAuction = sampleAuctionOfTyp (TimedAscending (TA.defaultOptions SEK)) in 
-  let emptyAscAuction = emptyState timedAscAuction in
+  let bid2= Bid { 
+    bidId= "doesbead-olds-base-ease-addedblesses"::BidId,
+    bidder = buyer2,
+    bidAmount = sek 12,
+    forAuction = sampleAuctionId,
+    at = addUTCTime (toEnum 2) sampleStartsAt
+  }
+
+  let timedAscAuction = sampleAuctionOfTyp (TimedAscending (TA.defaultOptions SEK)) 
+  let emptyAscAuction = emptyState timedAscAuction
     
   describe "auction states" $ do
     it "can increment twice" $
@@ -70,11 +71,9 @@ spec ()=
     it "can end" $
       stateEnded `shouldBe` Right (TA.HasEnded [] sampleEndsAt (TA.defaultOptions SEK))
 
-
     it "ended with two bids" $ 
       let stateEndedAfterTwoBids = S.inc sampleEndsAt stateWith2Bids in
-        trace ("stateWith2Bids" ++ show stateWith2Bids)
-        stateEndedAfterTwoBids `shouldBe` Right (TA.HasEnded [ bid1,bid2 ] sampleEndsAt (TA.defaultOptions SEK))
+        stateEndedAfterTwoBids `shouldBe` Right (TA.HasEnded [ bid2, bid1 ] sampleEndsAt (TA.defaultOptions SEK))
 
       {-
     it "cant bid after auction has ended" $

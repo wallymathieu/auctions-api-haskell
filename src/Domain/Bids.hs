@@ -4,6 +4,7 @@ import Money
 import Domain.Prelude
 import GHC.Generics
 import Data.Time
+import Data.Aeson
 
 data Bid = Bid { bidId :: BidId,
   forAuction :: AuctionId,
@@ -12,3 +13,5 @@ data Bid = Bid { bidId :: BidId,
   bidAmount :: Amount
 } deriving (Eq, Generic, Show)
 
+instance ToJSON Bid
+instance FromJSON Bid  

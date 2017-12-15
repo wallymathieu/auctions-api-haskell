@@ -1,13 +1,12 @@
 {-# LANGUAGE DeriveGeneric     #-}
 module Domain.SingleSealedBid (module Domain.SingleSealedBid) where
-import Money
 import Domain.Prelude
 import qualified Domain.States as S
 import Domain.Bids
 import qualified Data.Map as Map
-import qualified Data.List as List
 import GHC.Generics
 import Data.Time
+import Data.Aeson
 
 data Options =
   {- Sealed first-price auction 
@@ -73,3 +72,6 @@ instance S.State State where
       AcceptingBids { }-> False
       DisclosingBids { } -> True
   
+
+instance ToJSON Options
+instance FromJSON Options

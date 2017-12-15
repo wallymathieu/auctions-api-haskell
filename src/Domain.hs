@@ -8,8 +8,6 @@ module Domain (
 ) where
 import qualified Data.Map as Map
 import qualified Data.List as List
-import qualified Either as E
-import Data.Either
 import Domain.Prelude
 import Domain.Auctions
 import Domain.Bids
@@ -35,9 +33,9 @@ handle state r =
   PlaceBid time bid ->
     let aId = forAuction bid in
     case Map.lookup aId r of
-    Just (auction,state) ->
+    Just (auction,state') ->
       validateBid bid auction >>= (\()->
-        let (next, res)= addBid bid state in
+        let (next, res)= addBid bid state' in
         let newR= Map.insert aId (auction, next) r in
           res >>= (\() -> Right (newR, BidAccepted time bid) )
       )
