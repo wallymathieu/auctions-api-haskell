@@ -18,12 +18,13 @@ data Options =
   {- Also known as a sealed-bid second-price auction.
     This is identical to the sealed first-price auction except that the winning bidder pays the second-highest bid
     rather than his or her own -}
-  |Vickrey deriving (Generic, Show)
+  |Vickrey deriving (Eq, Generic, Show)
 
 data State =
   AcceptingBids (Map.Map UserId Bid) UTCTime Options
   | DisclosingBids [Bid] UTCTime Options
-
+  deriving(Eq, Generic, Show)
+  
 emptyState :: UTCTime -> Options -> State
 emptyState=AcceptingBids Map.empty
 

@@ -5,7 +5,7 @@ import Data.Time
 
 type UserId = String
 type BidId = String
-type AuctionId = Integer
+type AuctionId = Integer 
 
 data Errors = 
   UnknownAuction AuctionId
@@ -21,3 +21,5 @@ data Errors =
   | InvalidUserData String
   | MustPlaceBidOverHighestBid Amount
   | AlreadyPlacedBid
+  deriving (Eq,Show)
+  

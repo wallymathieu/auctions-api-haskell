@@ -15,7 +15,7 @@ data AuctionType=
   The auction ends when no participant is willing to bid further -}
   TimedAscending TA.Options
   | SingleSealedBid SB.Options
-  deriving (Generic, Show)
+  deriving (Eq, Generic, Show)
 
 data Auction = Auction { auctionId :: AuctionId,
   startsAt :: UTCTime,
@@ -25,8 +25,9 @@ data Auction = Auction { auctionId :: AuctionId,
   seller :: UserId,
   typ :: AuctionType,
   auctionCurrency :: Currency
-} deriving (Generic, Show)
+} deriving (Eq, Generic, Show)
 
+validateBid:: Bid->Auction->Either Errors ()
 validateBid bid auction
   | bidder bid == seller auction =
     Left (SellerCannotPlaceBids (bidder bid, auctionId auction))

@@ -10,5 +10,5 @@ data Bid = Bid { bidId :: BidId,
   bidder :: UserId,
   at :: UTCTime,
   bidAmount :: Amount
-} deriving (Generic, Show)
+} deriving (Eq, Generic, Show)
 
