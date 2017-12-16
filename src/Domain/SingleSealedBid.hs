@@ -4,9 +4,11 @@ import Domain.Prelude
 import qualified Domain.States as S
 import Domain.Bids
 import qualified Data.Map as Map
+import qualified Data.List as List
 import GHC.Generics
 import Data.Time
 import Data.Aeson
+import Data.Ord
 
 data Options =
   {- Sealed first-price auction 
@@ -28,28 +30,29 @@ emptyState :: UTCTime -> Options -> State
 emptyState=AcceptingBids Map.empty
 
 instance S.State State where
+
   inc now state = case state of
-           AcceptingBids bids expiry opt-> 
-            if now>=expiry then
-              DisclosingBids (Map.elems bids) expiry opt
-            else
-              state
-           DisclosingBids {}-> state
+    AcceptingBids bids expiry opt-> 
+      if now>=expiry then
+        DisclosingBids (List.sortOn (Down . bidAmount ) $ Map.elems bids) expiry opt
+      else
+        state
+    DisclosingBids {}-> state
 
   addBid bid state = 
-          let auctionId= forAuction bid in
-          let user= bidder bid in
-          case state of
-           AcceptingBids bids expiry opt-> 
-             case (at bid>=expiry, Map.member user bids ) of
-             (False,True) ->
-              (state, Left AlreadyPlacedBid)
-             (False,False) ->
-              (AcceptingBids (Map.insert user bid bids) expiry opt, Right ())
-             (True,_) ->
-              (DisclosingBids (Map.elems bids) expiry opt,Left (AuctionHasEnded auctionId))
-  
-           DisclosingBids {}-> (state,Left (AuctionHasEnded auctionId))
+    let auctionId= forAuction bid in
+    let user= bidder bid in
+    case state of
+      AcceptingBids bids expiry opt-> 
+        case (at bid>=expiry, Map.member user bids ) of
+          (False,True) ->
+            (state, Left AlreadyPlacedBid)
+          (False,False) ->
+            (AcceptingBids (Map.insert user bid bids) expiry opt, Right ())
+          (True,_) ->
+            (DisclosingBids (List.sortOn (Down . bidAmount ) $ Map.elems bids) expiry opt,Left (AuctionHasEnded auctionId))
+
+      DisclosingBids {}-> (state,Left (AuctionHasEnded auctionId))
   
   getBids state = 
     case state of
@@ -59,12 +62,12 @@ instance S.State State where
   tryGetAmountAndWinner state = 
     case state of
       AcceptingBids { } -> Nothing
-      DisclosingBids  (highestBid : (secondHighest : _))  _
-                       Vickrey  -> Just (bidAmount secondHighest, bidder highestBid)
-      DisclosingBids [highestBid] _
-                       Vickrey -> Just (bidAmount highestBid, bidder highestBid)
-      DisclosingBids (highestBid : _) _
-                      Blind -> Just (bidAmount highestBid, bidder highestBid)
+      DisclosingBids  (highestBid : (secondHighest : _))  _ Vickrey  -> 
+        Just (bidAmount secondHighest, bidder highestBid)
+      DisclosingBids [highestBid] _ Vickrey -> 
+        Just (bidAmount highestBid, bidder highestBid)
+      DisclosingBids (highestBid : _) _ Blind ->
+        Just (bidAmount highestBid, bidder highestBid)
       _ -> Nothing
 
   hasEnded state = 
