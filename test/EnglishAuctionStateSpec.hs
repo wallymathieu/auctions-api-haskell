@@ -17,11 +17,6 @@ spec ()=do
   let emptyEndedAscAuctionState = S.inc sampleEndsAt emptyAscAuctionState
   
   describe "english auction states" $ do
-    it "can increment twice" $
-      let s= S.inc sampleBidTime emptyAscAuctionState in
-      let s2= S.inc sampleBidTime s in
-          s `shouldBe` s2
-
     let (stateWith1Bid,result1) = S.addBid bid1 emptyAscAuctionState 
             
     it "can add bid to empty state" $

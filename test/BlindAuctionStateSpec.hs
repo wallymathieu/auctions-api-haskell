@@ -15,11 +15,6 @@ spec ()=do
   let blindAuction = sampleAuctionOfTyp (SingleSealedBid SB.Blind) 
   let emptyBlindAuctionState = emptyState blindAuction
   describe "blind auction states" $ do
-    it "can increment twice" $
-      let s= S.inc sampleBidTime emptyBlindAuctionState in
-      let s2= S.inc sampleBidTime s in
-          s `shouldBe` s2
-
     let (stateWith1Bid,result1) = S.addBid bid1 emptyBlindAuctionState 
             
     it "can add bid to empty state" $

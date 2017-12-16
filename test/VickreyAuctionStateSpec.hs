@@ -15,11 +15,6 @@ spec ()=do
   let vickreyAuction = sampleAuctionOfTyp (SingleSealedBid SB.Vickrey) 
   let emptyVickreyAuctionState = emptyState vickreyAuction
   describe "vickrey auction states" $ do
-    it "can increment twice" $
-      let s= S.inc sampleBidTime emptyVickreyAuctionState in
-      let s2= S.inc sampleBidTime s in
-          s `shouldBe` s2
-
     let (stateWith1Bid,result1) = S.addBid bid1 emptyVickreyAuctionState 
             
     it "can add bid to empty state" $
