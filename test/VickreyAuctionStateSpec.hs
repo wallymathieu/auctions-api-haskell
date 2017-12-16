@@ -39,20 +39,4 @@ spec ()=do
       let maybeAmountAndWinner = S.tryGetAmountAndWinner stateEndedAfterTwoBids in
       maybeAmountAndWinner `shouldBe` Just (bidAmount1, buyer2)
 
-    it "wont end just after start" $
-      let state = S.inc (addUTCTime (toEnum 1) sampleStartsAt) emptyVickreyAuctionState in
-      S.hasEnded state `shouldBe` False
-
-    it "wont end just before end" $
-      let state = S.inc (addUTCTime (toEnum (- 1)) sampleEndsAt) emptyVickreyAuctionState in
-      S.hasEnded state `shouldBe` False
-
-    it "wont end just before start" $
-      let state = S.inc (addUTCTime (toEnum (- 1)) sampleStartsAt) emptyVickreyAuctionState in
-      S.hasEnded state `shouldBe` False
-
-    it "will have ended just after end" $
-      let state = S.inc (addUTCTime (toEnum 1) sampleEndsAt) emptyVickreyAuctionState in
-      S.hasEnded state `shouldBe` True
-
     incrementSpec emptyVickreyAuctionState
