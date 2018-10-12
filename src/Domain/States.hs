@@ -4,7 +4,6 @@ import Domain.Bids
 import Data.Time
 import Data.Bifunctor
 import Money
-import qualified Either as E
 
 class State a where
   inc :: UTCTime -> a -> a
@@ -30,10 +29,10 @@ instance (State a , State b) => (State (Either a b)) where
     splitFstJoinSnd res
   getBids state=
     let res = bimap getBids getBids state in
-      E.join res
+      either id id res
   tryGetAmountAndWinner state=
     let res = bimap tryGetAmountAndWinner tryGetAmountAndWinner state in
-      E.join res
+      either id id res
   hasEnded state=
     let res = bimap hasEnded hasEnded state in
-      E.join res
+      either id id res

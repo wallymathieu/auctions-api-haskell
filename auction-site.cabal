@@ -23,7 +23,7 @@ library
                       , Domain.SingleSealedBid, Domain.TimedAscending, Domain.States
                       , Domain.Commands
                       , Persistence.JsonFile
-  other-modules:      Either
+  other-modules:
   build-depends:       base >= 4.9 && < 5
                       , containers >= 0.5 && <0.6
                       , aeson
