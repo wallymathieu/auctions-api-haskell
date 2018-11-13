@@ -2,7 +2,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# OPTIONS_GHC -fno-warn-unused-binds -fno-warn-unused-imports #-}
 
-module Auction.Types (
+module Auctions.Types (
   AddAuction (..),
   AddBid (..),
   Amount (..),

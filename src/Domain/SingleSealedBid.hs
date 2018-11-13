@@ -7,7 +7,7 @@ import qualified Data.Map as Map
 import qualified Data.List as List
 import GHC.Generics
 import Data.Time
-import Data.Aeson
+import qualified Data.Aeson as A
 import Data.Ord
 
 data Options =
@@ -76,5 +76,5 @@ instance S.State State where
       DisclosingBids { } -> True
   
 
-instance ToJSON Options
-instance FromJSON Options
+instance A.ToJSON Options
+instance A.FromJSON Options

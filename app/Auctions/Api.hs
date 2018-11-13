@@ -9,10 +9,8 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE ViewPatterns #-}
-{-# OPTIONS_GHC
--fno-warn-unused-binds -fno-warn-unused-imports -fcontext-stack=328 #-}
 
-module Auction.API
+module Auctions.Api
   -- * Client and Server
   ( ServerConfig(..)
   , AuctionBackend
@@ -25,7 +23,7 @@ module Auction.API
   , AuctionAPI
   ) where
 
-import Auction.Types
+import Auctions.Types
 
 import Control.Monad.Except (ExceptT)
 import Control.Monad.IO.Class

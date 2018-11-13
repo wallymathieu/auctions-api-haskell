@@ -6,8 +6,8 @@ import           Data.Monoid      ((<>))
 import           Data.Text        (pack)
 import           GHC.Generics
 import qualified Prelude as P
-import Auction.API
-import Auction.Handlers
+import Auctions.Api
+import Auctions.Handlers
 
 -- import qualified Money as M
 import qualified Domain.Prelude as DP

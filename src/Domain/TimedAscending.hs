@@ -6,7 +6,7 @@ import qualified Domain.States as S
 import Domain.Bids
 import GHC.Generics
 import Data.Time
-import Data.Aeson
+import qualified Data.Aeson as A
 
 data Options = Options { 
   {- the seller has set a minimum sale price in advance (the 'reserve' price) 
@@ -114,6 +114,6 @@ instance S.State Domain.TimedAscending.State where
     HasEnded {} -> True 
     _ -> False
 
-instance ToJSON Options
-instance FromJSON Options
+instance A.ToJSON Options
+instance A.FromJSON Options
     
