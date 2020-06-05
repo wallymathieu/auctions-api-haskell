@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveGeneric  #-}
+{-# LANGUAGE OverloadedStrings #-}
 module Domain.Auctions (module Domain.Auctions) where
 
 import Money
@@ -7,8 +8,12 @@ import Domain.Bids
 import qualified Domain.TimedAscending as TA
 import qualified Domain.SingleSealedBid as SB
 import GHC.Generics
-import Data.Time
+import Data.Time.Clock (secondsToNominalDiffTime, UTCTime)
 import Data.Aeson
+import qualified Data.Text as T
+import Money
+import Data.Fixed (Pico)
+import Data.Monoid ((<>))
 
 data AuctionType=
   {- also known as an open ascending price auction
@@ -16,6 +21,23 @@ data AuctionType=
   TimedAscending TA.Options
   | SingleSealedBid SB.Options
   deriving (Eq, Generic, Show)
+
+instance ToJSON AuctionType where
+    toJSON (TimedAscending opt) = 
+      String $ T.intercalate "|" ["English",T.pack $ show $ TA.reservePrice opt, T.pack $ show $ TA.minRaise opt, T.pack $ show $ TA.timeFrame opt]
+    toJSON (SingleSealedBid SB.Blind) = String "Blind"
+    toJSON (SingleSealedBid SB.Vickrey) = String "Vickrey"
+
+instance FromJSON AuctionType where
+    parseJSON (String t)  = case T.splitOn "|" t of
+        "English": reservePrice: minRaise: timeframe:[] ->
+          let t = read $ T.unpack timeframe ::Pico in
+            pure $ TimedAscending $ TA.Options {TA.reservePrice =read $ T.unpack reservePrice, TA.minRaise =read $ T.unpack minRaise, TA.timeFrame = secondsToNominalDiffTime t } 
+        "Blind":[]   -> pure $ SingleSealedBid SB.Blind
+        "Vickrey":[] -> pure $ SingleSealedBid SB.Vickrey 
+        _           -> fail $ "Unknown auction type: " <> T.unpack t
+    parseJSON _ = fail $ "Unknown auction type"
+
 
 data Auction = Auction { auctionId :: AuctionId,
   startsAt :: UTCTime,
@@ -45,7 +67,5 @@ emptyState a =
 
 
 
-instance ToJSON AuctionType
-instance FromJSON AuctionType
 instance ToJSON Auction
 instance FromJSON Auction

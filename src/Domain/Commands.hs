@@ -9,7 +9,7 @@ import Data.Aeson
 data Command = 
   AddAuction UTCTime Auction
   | PlaceBid UTCTime Bid
-  deriving (Generic, Show)
+  deriving (Generic, Show, Eq)
 
 data CommandSuccess = 
   AuctionAdded UTCTime Auction

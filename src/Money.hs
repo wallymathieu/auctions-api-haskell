@@ -10,10 +10,10 @@ data Currency =
   |SEK
   -- Danish 'Krone'
   |DKK
-  deriving (Generic, Show, Eq, Ord)
+  deriving (Generic, Show, Eq, Ord, Read)
 
 data Amount = Amount Currency Integer
-  deriving (Generic, Show, Eq, Ord)
+  deriving (Generic, Show, Eq, Ord, Read)
 
 amountCurrency :: Amount -> Currency
 amountCurrency (Amount c _) = c

@@ -23,13 +23,15 @@ library
                       , Domain.SingleSealedBid, Domain.TimedAscending, Domain.States
                       , Domain.Commands
                       , Persistence.JsonFile
+                      , Persistence.Redis
   other-modules:
   build-depends:       base >= 4.9 && < 5
-                      , containers >= 0.5 && <0.6
+                      , containers >= 0.6 && <0.7
                       , aeson
                       , text
                       , time
                       , bytestring
+                      , hedis
   default-language:    Haskell2010
 
 executable auction-site-exe
@@ -37,7 +39,7 @@ executable auction-site-exe
   main-is:             Main.hs
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   build-depends:       base
-                     , Spock
+                     , scotty
                      , auction-site
                      , aeson
                      , text
@@ -48,16 +50,20 @@ test-suite auction-site-test
   hs-source-dirs:      test
   main-is:             Spec.hs
   build-depends:       base
-                     , Spock
+                     , scotty
                      , auction-site
                      , hspec
                      , time
                      , hspec
+                     , directory
+                     , aeson
+                     , bytestring
   other-modules:       SampleData
                      , AuctionStateSpecs
                      , EnglishAuctionStateSpec
                      , VickreyAuctionStateSpec
                      , BlindAuctionStateSpec
+                     , SerializationSpec
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N 
   default-language:    Haskell2010
 
