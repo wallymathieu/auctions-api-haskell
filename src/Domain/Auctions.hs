@@ -31,8 +31,11 @@ instance ToJSON AuctionType where
 instance FromJSON AuctionType where
     parseJSON (String t)  = case T.splitOn "|" t of
         "English": reservePrice: minRaise: timeframe:[] ->
-          let t = read $ T.unpack timeframe ::Pico in
-            pure $ TimedAscending $ TA.Options {TA.reservePrice =read $ T.unpack reservePrice, TA.minRaise =read $ T.unpack minRaise, TA.timeFrame = secondsToNominalDiffTime t } 
+          pure $ TimedAscending $ TA.Options {
+            TA.reservePrice = read $ T.unpack reservePrice,
+            TA.minRaise = read $ T.unpack minRaise,
+            TA.timeFrame = secondsToNominalDiffTime (read $ T.unpack timeframe :: Pico)
+          }
         "Blind":[]   -> pure $ SingleSealedBid SB.Blind
         "Vickrey":[] -> pure $ SingleSealedBid SB.Vickrey 
         _           -> fail $ "Unknown auction type: " <> T.unpack t
