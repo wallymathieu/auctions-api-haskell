@@ -23,23 +23,23 @@ data AuctionType=
   deriving (Eq, Generic, Show)
 
 instance ToJSON AuctionType where
-    toJSON (TimedAscending opt) = 
-      String $ T.intercalate "|" ["English",T.pack $ show $ TA.reservePrice opt, T.pack $ show $ TA.minRaise opt, T.pack $ show $ TA.timeFrame opt]
-    toJSON (SingleSealedBid SB.Blind) = String "Blind"
-    toJSON (SingleSealedBid SB.Vickrey) = String "Vickrey"
+  toJSON (TimedAscending opt) = 
+    String $ T.intercalate "|" ["English",T.pack $ show $ TA.reservePrice opt, T.pack $ show $ TA.minRaise opt, T.pack $ show $ TA.timeFrame opt]
+  toJSON (SingleSealedBid SB.Blind) = String "Blind"
+  toJSON (SingleSealedBid SB.Vickrey) = String "Vickrey"
 
 instance FromJSON AuctionType where
-    parseJSON (String t)  = case T.splitOn "|" t of
-        "English": reservePrice: minRaise: timeframe:[] ->
-          pure $ TimedAscending $ TA.Options {
-            TA.reservePrice = read $ T.unpack reservePrice,
-            TA.minRaise = read $ T.unpack minRaise,
-            TA.timeFrame = secondsToNominalDiffTime (read $ T.unpack timeframe :: Pico)
-          }
-        "Blind":[]   -> pure $ SingleSealedBid SB.Blind
-        "Vickrey":[] -> pure $ SingleSealedBid SB.Vickrey 
-        _           -> fail $ "Unknown auction type: " <> T.unpack t
-    parseJSON _ = fail $ "Unknown auction type"
+  parseJSON (String t)  = case T.splitOn "|" t of
+    "English": reservePrice: minRaise: timeframe:[] ->
+      pure $ TimedAscending $ TA.Options {
+        TA.reservePrice = read $ T.unpack reservePrice,
+        TA.minRaise = read $ T.unpack minRaise,
+        TA.timeFrame = secondsToNominalDiffTime (read $ T.unpack timeframe :: Pico)
+      }
+    "Blind":[]   -> pure $ SingleSealedBid SB.Blind
+    "Vickrey":[] -> pure $ SingleSealedBid SB.Vickrey 
+    _           -> fail $ "Unknown auction type: " <> T.unpack t
+  parseJSON _ = fail $ "Unexpected json for auction type"
 
 
 data Auction = Auction { auctionId :: AuctionId,
@@ -69,6 +69,8 @@ emptyState a =
   TimedAscending opt -> Right (TA.emptyState (startsAt a) (expiry a) opt)
 
 
+instance ToJSON Auction where
+  toJSON (Auction auctionId startsAt title expiry seller typ auctionCurrency) = object ["id" .= auctionId, "startsAt" .= startsAt, "title" .= title, "expiry" .=expiry, "user" .=seller, "type".=typ, "currency".=auctionCurrency]
 
-instance ToJSON Auction
-instance FromJSON Auction
+instance FromJSON Auction where
+  parseJSON = withObject "Auction" $ \v -> Auction <$> v .: "id" <*> v .: "startsAt" <*> v .: "title" <*> v .: "expiry" <*> v .: "user" <*> v .: "type" <*> v .: "currency"

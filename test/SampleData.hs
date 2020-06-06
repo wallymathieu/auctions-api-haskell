@@ -34,8 +34,8 @@ sampleAuctionOfTyp typ' = Auction { auctionId = sampleAuctionId,
   typ= typ'
 }
 
-sampleAuction:: ()-> Auction
-sampleAuction ()=sampleAuctionOfTyp (SingleSealedBid Vickrey)
+sampleAuction::Auction
+sampleAuction=sampleAuctionOfTyp (SingleSealedBid Vickrey)
 sek :: Integer -> Amount
 sek =Amount SEK
 sampleBid :: Bid

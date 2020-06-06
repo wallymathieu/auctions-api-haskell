@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveGeneric     #-}
+{-# LANGUAGE OverloadedStrings #-}
 module Domain.Bids (module Domain.Bids) where
 import Money
 import Domain.Prelude
@@ -13,5 +14,8 @@ data Bid = Bid { bidId :: BidId,
   bidAmount :: Amount
 } deriving (Eq, Generic, Show)
 
-instance ToJSON Bid
-instance FromJSON Bid  
+instance ToJSON Bid where
+  toJSON (Bid bidId forAuction bidder at bidAmount) = object ["id" .= bidId, "auction" .= forAuction, "user" .=bidder, "at".=at, "amount".=bidAmount]
+
+instance FromJSON Bid where
+  parseJSON = withObject "Bid" $ \v -> Bid <$> v .: "id" <*> v .: "auction" <*> v .: "user" <*> v .: "at" <*> v .: "amount"
