@@ -1,7 +1,8 @@
 {-# LANGUAGE DeriveGeneric     #-}
 module Domain.TimedAscending (module Domain.TimedAscending) where
-import Money
 import Domain.Prelude
+import Money
+import Prelude hiding ((+))
 import qualified Domain.States as S
 import Domain.Bids
 import GHC.Generics
@@ -80,7 +81,7 @@ instance S.State Domain.TimedAscending.State where
               let highestBidAmount = bidAmount highestBid in
               let nextExpiry' = max nextExpiry (addUTCTime (timeFrame opt) now) in
               let minRaiseAmount = minRaise opt in
-              if bAmount > amountAdd highestBidAmount minRaiseAmount then
+              if bAmount > highestBidAmount + minRaiseAmount then
                 -- OnGoing -> OnGoing B++
                 (OnGoing (bid:bids) nextExpiry' opt, Right())
               else 

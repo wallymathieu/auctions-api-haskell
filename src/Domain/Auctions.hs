@@ -20,6 +20,7 @@ import Data.Fixed (Pico)
 import Data.Monoid ((<>))
 import           Data.List                      ( intersperse, intercalate )
 import           Text.Read                      ( readMaybe )
+import           Parser
 
 data AuctionType=
   {- also known as an open ascending price auction
@@ -36,29 +37,28 @@ instance Show AuctionType where
 
 instance A.ToJSON AuctionType where
   toJSON at = A.String $ T.pack $ show at
-
-parseAuctionType :: T.Text -> Maybe AuctionType
-parseAuctionType t=
-  case T.splitOn "|" t of
-    "English": a: b: c:[] ->
-      let reservePrice = parseAmount $ T.unpack a
-          minRaise     = parseAmount $ T.unpack b
-          timeframe    = readMaybe $ T.unpack c :: Maybe Pico
-      in
-        case (reservePrice,minRaise,timeframe) of
-          (Just reservePrice', Just minRaise', Just timeframe')->
-            pure $ TimedAscending $ TA.Options {
-              TA.reservePrice = reservePrice',
-              TA.minRaise = minRaise',
-              TA.timeFrame = secondsToNominalDiffTime timeframe'
-            }
-          _ -> Nothing
-    "Blind":[]   -> pure $ SingleSealedBid SB.Blind
-    "Vickrey":[] -> pure $ SingleSealedBid SB.Vickrey
-    _            -> Nothing
+instance Parser AuctionType where
+  parse t=
+    case T.splitOn "|" t of
+      "English": a: b: c:[] ->
+        let reservePrice = parse $ a
+            minRaise     = parse $ b
+            timeframe    = readMaybe $ T.unpack c :: Maybe Pico
+        in
+          case (reservePrice,minRaise,timeframe) of
+            (Just reservePrice', Just minRaise', Just timeframe')->
+              pure $ TimedAscending $ TA.Options {
+                TA.reservePrice = reservePrice',
+                TA.minRaise = minRaise',
+                TA.timeFrame = secondsToNominalDiffTime timeframe'
+              }
+            _ -> Nothing
+      "Blind":[]   -> pure $ SingleSealedBid SB.Blind
+      "Vickrey":[] -> pure $ SingleSealedBid SB.Vickrey
+      _            -> Nothing
 
 instance A.FromJSON AuctionType where
-  parseJSON = A.withText "AuctionType" (\t-> case parseAuctionType t of Just at->pure at; Nothing -> fail "failed to parse auction type")
+  parseJSON = A.withText "AuctionType" (\t-> case parse t :: Maybe AuctionType of Just at->pure at; Nothing -> fail "failed to parse auction type")
 
 data Auction = Auction { auctionId :: AuctionId,
   startsAt :: UTCTime,
