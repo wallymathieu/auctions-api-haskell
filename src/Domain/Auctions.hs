@@ -8,7 +8,7 @@ import Domain.Bids
 import qualified Domain.TimedAscending as TA
 import qualified Domain.SingleSealedBid as SB
 import GHC.Generics
-import Data.Time.Clock (secondsToNominalDiffTime, UTCTime)
+import Data.Time.Clock (secondsToNominalDiffTime, UTCTime, nominalDiffTimeToSeconds)
 import qualified Data.Aeson as A
 import           Data.Aeson                     ( object
                                                 , (.=)
@@ -18,6 +18,8 @@ import qualified Data.Text as T
 import Money
 import Data.Fixed (Pico)
 import Data.Monoid ((<>))
+import           Data.List                      ( intersperse, intercalate )
+import           Text.Read                      ( readMaybe )
 
 data AuctionType=
   {- also known as an open ascending price auction
@@ -26,7 +28,8 @@ data AuctionType=
   | SingleSealedBid SB.Options
   deriving (Eq, Generic)
 instance Show AuctionType where
-  show (TimedAscending opt) = "English|"++ ( show $ TA.reservePrice opt)++"|"++( show $ TA.minRaise opt)++"|"++( show $ TA.timeFrame opt)
+  show (TimedAscending opt) = 
+    intercalate "|" [ "English", (show $ TA.reservePrice opt),( show $ TA.minRaise opt), ( show $ nominalDiffTimeToSeconds $ TA.timeFrame opt)]
   show (SingleSealedBid SB.Blind) = "Blind"
   show (SingleSealedBid SB.Vickrey) = "Vickrey"
 
@@ -37,14 +40,21 @@ instance A.ToJSON AuctionType where
 parseAuctionType :: T.Text -> Maybe AuctionType
 parseAuctionType t=
   case T.splitOn "|" t of
-    "English": reservePrice: minRaise: timeframe:[] ->
-      pure $ TimedAscending $ TA.Options {
-        TA.reservePrice = read $ T.unpack reservePrice,
-        TA.minRaise = read $ T.unpack minRaise,
-        TA.timeFrame = secondsToNominalDiffTime (read $ T.unpack timeframe :: Pico)
-      }
+    "English": a: b: c:[] ->
+      let reservePrice = parseAmount $ T.unpack a
+          minRaise     = parseAmount $ T.unpack b
+          timeframe    = readMaybe $ T.unpack c :: Maybe Pico
+      in
+        case (reservePrice,minRaise,timeframe) of
+          (Just reservePrice', Just minRaise', Just timeframe')->
+            pure $ TimedAscending $ TA.Options {
+              TA.reservePrice = reservePrice',
+              TA.minRaise = minRaise',
+              TA.timeFrame = secondsToNominalDiffTime timeframe'
+            }
+          _ -> Nothing
     "Blind":[]   -> pure $ SingleSealedBid SB.Blind
-    "Vickrey":[] -> pure $ SingleSealedBid SB.Vickrey 
+    "Vickrey":[] -> pure $ SingleSealedBid SB.Vickrey
     _            -> Nothing
 
 instance A.FromJSON AuctionType where
@@ -69,7 +79,7 @@ validateBid bid auction
   | otherwise = Right ()
 
 type AuctionState = Either SB.State TA.State
-  
+
 emptyState :: Auction -> AuctionState
 emptyState a =
   case typ a of

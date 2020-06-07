@@ -14,10 +14,12 @@ import qualified SampleData as S
 import qualified Domain.Commands as C
 import qualified Data.ByteString.Lazy.Char8 as BS
 import qualified Domain.TimedAscending as TA
+import qualified Data.Text as T
 
 addAuction = C.AddAuction S.sampleStartsAt S.sampleAuction
 bid = C.PlaceBid S.sampleBidTime S.bid1
-
+vac0= Amount VAC 0
+timedAscending=TimedAscending (TA.Options vac0 vac0 (0::NominalDiffTime) )
 spec:: ()->SpecWith ()
 spec () = do
   describe "read json" $ do
@@ -25,18 +27,21 @@ spec () = do
       cmds <- readCommands "./test/samples/sample-commands.jsonl"
       cmds `shouldBe` (Just [])
     it "can deserialize type" $
-      let expected = TimedAscending (TA.Options (Amount VAC 0) (Amount VAC 0) (0::NominalDiffTime) ) in
-        let decoded = decode $ BS.pack "English|VAC0|VAC0|0" :: Maybe AuctionType in
-          decoded `shouldBe` Just expected
+      let decoded = decode $ BS.pack "\"English|VAC0|VAC0|0\"" :: Maybe AuctionType in
+        decoded `shouldBe` Just timedAscending
   describe "parse" $ do
     it "can parse amount" $
-      let expected = (Amount VAC 0) in
-        let decoded = parseAmount "VAC0" in
-          decoded `shouldBe` Just expected
-    it "can parse and write" $
-      let expected = (Amount VAC 0) in
-        let decoded = parseAmount $ show expected in
-          decoded `shouldBe` Just expected
+      let decoded = parseAmount "VAC0" in
+        decoded `shouldBe` Just vac0
+    it "can parse and write amount" $
+      let decoded = parseAmount $ show vac0 in
+        decoded `shouldBe` Just vac0
+    it "can write auctiontype" $
+      let decoded = parseAuctionType $ T.pack $ show timedAscending in
+        decoded `shouldBe` Just timedAscending
+    it "can read auctiontype" $
+      let decoded = parseAuctionType $ T.pack $ "English|VAC0|VAC0|0" in
+        decoded `shouldBe` Just timedAscending
 
   describe "write json" $ do
     it "can serialize add auction" $

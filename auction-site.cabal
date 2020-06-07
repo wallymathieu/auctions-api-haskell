@@ -62,6 +62,7 @@ test-suite auction-site-test
                      , directory
                      , aeson
                      , bytestring
+                     , text
   other-modules:       SampleData
                      , AuctionStateSpecs
                      , EnglishAuctionStateSpec
