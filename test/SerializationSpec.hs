@@ -25,10 +25,17 @@ spec () = do
   describe "read json" $ do
     it "reading commands from jsonl" $ do
       cmds <- readCommands "./test/samples/sample-commands.jsonl"
-      cmds `shouldBe` (Just [])
+      cmds `shouldNotBe` Nothing
     it "can deserialize type" $
       let decoded = decode $ BS.pack "\"English|VAC0|VAC0|0\"" :: Maybe AuctionType in
         decoded `shouldBe` Just timedAscending
+    it "read add auction" $
+      let decoded = decode $ BS.pack "{\"$type\":\"AddAuction\",\"at\":\"2020-05-17T08:15:16.464Z\",\"auction\":{\"id\":1,\"startsAt\":\"2018-12-01T10:00:00.000Z\",\"title\":\"Some auction\",\"expiry\":\"2020-05-18T10:00:00.000Z\",\"user\":\"BuyerOrSeller|a1|Test\",\"type\":\"English|VAC0|VAC0|0\",\"currency\":\"VAC\"}}" :: Maybe C.Command in
+        decoded `shouldNotBe` Nothing
+    it "read place bid" $
+      let decoded = decode $ BS.pack "{\"$type\":\"PlaceBid\",\"at\":\"2020-05-17T08:15:22.948Z\",\"bid\":{\"id\":\"32e692cc3fdb451da9647d6eeca5b2e3\",\"auction\":1,\"user\":\"BuyerOrSeller|a2|Buyer\",\"amount\":\"VAC11\",\"at\":\"2020-05-17T08:15:22.940Z\"}}" :: Maybe C.Command in
+        decoded `shouldNotBe` Nothing
+
   describe "parse" $ do
     it "can parse amount" $
       let decoded = parseAmount "VAC0" in
