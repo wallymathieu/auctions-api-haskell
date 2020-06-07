@@ -20,7 +20,7 @@ bid = C.PlaceBid S.sampleBidTime S.bid1
 
 spec:: ()->SpecWith ()
 spec () = do
-  describe "can read commands from jsonl" $ do
+  describe "read json" $ do
     it "reading commands from jsonl" $ do
       cmds <- readCommands "./test/samples/sample-commands.jsonl"
       cmds `shouldBe` (Just [])
@@ -28,9 +28,17 @@ spec () = do
       let expected = TimedAscending (TA.Options (Amount VAC 0) (Amount VAC 0) (0::NominalDiffTime) ) in
         let decoded = decode $ BS.pack "English|VAC0|VAC0|0" :: Maybe AuctionType in
           decoded `shouldBe` Just expected
+  describe "parse" $ do
+    it "can parse amount" $
+      let expected = (Amount VAC 0) in
+        let decoded = parseAmount "VAC0" in
+          decoded `shouldBe` Just expected
+    it "can parse and write" $
+      let expected = (Amount VAC 0) in
+        let decoded = parseAmount $ show expected in
+          decoded `shouldBe` Just expected
 
-
-  describe "can write commands" $ do
+  describe "write json" $ do
     it "can serialize add auction" $
       let encoded = BS.unpack $ encode addAuction in
         encoded `shouldBe` "{\"$type\":\"AddAuction\",\"at\":\"2016-01-01T08:28:00.607875Z\",\"auction\":{\"expiry\":\"2016-02-01T08:28:00.607875Z\",\"startsAt\":\"2016-01-01T08:28:00.607875Z\",\"user\":\"Sample_Seller\",\"currency\":\"SEK\",\"id\":1,\"title\":\"auction\",\"type\":\"Vickrey\"}}"

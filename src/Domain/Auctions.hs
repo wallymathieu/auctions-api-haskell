@@ -9,7 +9,11 @@ import qualified Domain.TimedAscending as TA
 import qualified Domain.SingleSealedBid as SB
 import GHC.Generics
 import Data.Time.Clock (secondsToNominalDiffTime, UTCTime)
-import Data.Aeson
+import qualified Data.Aeson as A
+import           Data.Aeson                     ( object
+                                                , (.=)
+                                                , (.:)
+                                                )
 import qualified Data.Text as T
 import Money
 import Data.Fixed (Pico)
@@ -20,16 +24,19 @@ data AuctionType=
   The auction ends when no participant is willing to bid further -}
   TimedAscending TA.Options
   | SingleSealedBid SB.Options
-  deriving (Eq, Generic, Show)
+  deriving (Eq, Generic)
+instance Show AuctionType where
+  show (TimedAscending opt) = "English|"++ ( show $ TA.reservePrice opt)++"|"++( show $ TA.minRaise opt)++"|"++( show $ TA.timeFrame opt)
+  show (SingleSealedBid SB.Blind) = "Blind"
+  show (SingleSealedBid SB.Vickrey) = "Vickrey"
 
-instance ToJSON AuctionType where
-  toJSON (TimedAscending opt) = 
-    String $ T.intercalate "|" ["English",T.pack $ show $ TA.reservePrice opt, T.pack $ show $ TA.minRaise opt, T.pack $ show $ TA.timeFrame opt]
-  toJSON (SingleSealedBid SB.Blind) = String "Blind"
-  toJSON (SingleSealedBid SB.Vickrey) = String "Vickrey"
 
-instance FromJSON AuctionType where
-  parseJSON (String t)  = case T.splitOn "|" t of
+instance A.ToJSON AuctionType where
+  toJSON at = A.String $ T.pack $ show at
+
+parseAuctionType :: T.Text -> Maybe AuctionType
+parseAuctionType t=
+  case T.splitOn "|" t of
     "English": reservePrice: minRaise: timeframe:[] ->
       pure $ TimedAscending $ TA.Options {
         TA.reservePrice = read $ T.unpack reservePrice,
@@ -38,9 +45,10 @@ instance FromJSON AuctionType where
       }
     "Blind":[]   -> pure $ SingleSealedBid SB.Blind
     "Vickrey":[] -> pure $ SingleSealedBid SB.Vickrey 
-    _           -> fail $ "Unknown auction type: " <> T.unpack t
-  parseJSON _ = fail $ "Unexpected json for auction type"
+    _            -> Nothing
 
+instance A.FromJSON AuctionType where
+  parseJSON = A.withText "AuctionType" (\t-> case parseAuctionType t of Just at->pure at; Nothing -> fail "failed to parse auction type")
 
 data Auction = Auction { auctionId :: AuctionId,
   startsAt :: UTCTime,
@@ -69,8 +77,8 @@ emptyState a =
   TimedAscending opt -> Right (TA.emptyState (startsAt a) (expiry a) opt)
 
 
-instance ToJSON Auction where
+instance A.ToJSON Auction where
   toJSON (Auction auctionId startsAt title expiry seller typ auctionCurrency) = object ["id" .= auctionId, "startsAt" .= startsAt, "title" .= title, "expiry" .=expiry, "user" .=seller, "type".=typ, "currency".=auctionCurrency]
 
-instance FromJSON Auction where
-  parseJSON = withObject "Auction" $ \v -> Auction <$> v .: "id" <*> v .: "startsAt" <*> v .: "title" <*> v .: "expiry" <*> v .: "user" <*> v .: "type" <*> v .: "currency"
+instance A.FromJSON Auction where
+  parseJSON = A.withObject "Auction" $ \v -> Auction <$> v .: "id" <*> v .: "startsAt" <*> v .: "title" <*> v .: "expiry" <*> v .: "user" <*> v .: "type" <*> v .: "currency"

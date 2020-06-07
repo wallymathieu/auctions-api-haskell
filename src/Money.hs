@@ -1,14 +1,14 @@
 {-# LANGUAGE DeriveGeneric     #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE QuasiQuotes       #-}
 module Money where
 import GHC.Generics
 import Data.Aeson
 import qualified Data.Text as T
-import           Text.RE.TDFA.String
 import           Text.Read                      ( readMaybe )
+import           Text.Regex.PCRE                (Regex, matchOnceText, makeRegex)
+import qualified Text.Regex.PCRE as R
+import           Data.Array
 
-data Currency = 
+data Currency =
   -- virtual acution currency
   VAC
   -- Swedish 'Krona'
@@ -18,7 +18,7 @@ data Currency =
   deriving (Generic, Show, Eq, Ord, Read)
 
 data Amount = Amount Currency Integer
-  deriving (Generic, Show, Eq, Ord, Read)
+  deriving (Generic, Eq, Ord, Read)
 
 amountCurrency :: Amount -> Currency
 amountCurrency (Amount c _) = c
@@ -33,20 +33,30 @@ amountAdd (Amount ac av) (Amount bc bv) =
   else
     error "Cant add two amounts with different currency"
 
+parseAmount :: String -> Maybe Amount
+parseAmount t=
+    case matchOnceText r t of
+      Just (_,captured,_) ->
+        let [_,currency,amount] = map fst $ elems captured in
+        case Amount <$> (readMaybe currency) <*> (readMaybe amount) of
+          Just a -> pure a
+          _ -> Nothing
+      _ -> Nothing
+    where
+      r = makeRegex "([A-Z]+)([0-9]+)" :: Regex
+
 instance ToJSON Currency
 instance FromJSON Currency
+instance Show Amount where
+  show (Amount currency value) = (show currency) ++ (show value)
 
 instance ToJSON Amount where
-  toJSON (Amount currency value) =
-    String $ T.pack ((show currency) ++ (show value))
+  toJSON amount = String $ T.pack (show amount)
 
-instance FromJSON Amount {- where
+instance FromJSON Amount where
   parseJSON (String t)  =
-    let r =matches $ (T.unpack t) *=~ [re|([A-Z]+)|([0-9]+)|] in
-      case r of
-        [currency,amount] -> case Amount <$> (readMaybe currency :: Maybe Currency) <*> (readMaybe amount :: Maybe Integer) of 
-          Just a -> pure a 
-          _ -> fail "failed to parse"
-        _ -> fail "failed to extract"
-  parseJSON _ = fail "invalid json"
--}
+      case parseAmount (T.unpack t) of
+        Just a ->pure a
+        _ -> fail "failed to parse amount"
+  parseJSON _ = fail "invalid json token for amount"
+
