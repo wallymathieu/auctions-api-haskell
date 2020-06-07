@@ -3,27 +3,23 @@
 module Main where
   
 import           Web.Scotty
-import           Data.Aeson
 import           Data.Monoid      ((<>))
 import           Data.Text        (pack)
 import           GHC.Generics
 import           Prelude
---import qualified Prelude as P
-
--- import qualified Money as M
+import           Control.Monad.IO.Class (liftIO)
+import           Network.HTTP.Types.Status (status404)
+import qualified Data.Aeson as A
 import qualified Domain.Prelude as DP
--- import qualified Domain.Auctions as A
--- import qualified Domain.Bids as B
--- import qualified Domain.Commands as C
--- import qualified Domain.SingleSealedBid as DS
--- import qualified Domain.TimedAscending as DT
+import qualified Domain.Auctions as A
+import qualified Domain.Commands as C
 
 newtype BidReq = BidReq { 
   amount:: Integer 
 } deriving (Generic, Show)
 
-instance ToJSON BidReq
-instance FromJSON BidReq
+instance A.ToJSON BidReq
+instance A.FromJSON BidReq
 
 data AddAuctionReq = AddAuctionReq {
   id :: DP.AuctionId,
@@ -34,20 +30,39 @@ data AddAuctionReq = AddAuctionReq {
   typ:: String
 } deriving (Generic, Show)
 
-instance ToJSON AddAuctionReq
-instance FromJSON AddAuctionReq
+instance A.ToJSON AddAuctionReq
+instance A.FromJSON AddAuctionReq
 
 main :: IO ()
 main = do
   scotty 8080 $ do
-    {-get "auction-req" $ do
-      json $ AddAuctionReq { id = 1, startsAt = "2017-1-1", title= "title", endsAt="2018-1-1", currency="SEK", typ="" }
-      -}
-    {-
-    post "auction" $ do
-      auction1 <- jsonBody' :: ApiAction AddAuctionReq
-      text $ "Parsed: " <> pack (show auction1)
-      -}
-    get "/:word" $ do
-      beam <- param "word"
-      html $ mconcat ["<h1>Scotty, ", beam, " me up!</h1>"]
+    get "/auctions" $ do
+      auctions <- liftIO readAuctions
+      json auctions
+    get "/auction/:id" $ do
+      {-
+      pid <- param "id"
+      case pid of 
+        Just tid  -> do
+                       Just auction <- liftIO $ readAuction tid
+                       json auction
+        Nothing -> status status404
+        -}
+      status status404 
+    post "/auction" $ do
+      {-auctionReq <- jsonData
+      res <- liftIO $ insertAuction auctionReq
+      json res-}
+      status status404 
+    post "/auction/:id/bid" $ do
+      {-pid <- param "id"
+      addBidReq <- jsonData-}
+      fail "!"
+  where
+    readAuctions :: IO [A.Auction]
+    readAuctions = fail "!"
+    readAuction :: Integer -> IO (Maybe A.Auction)
+    readAuction id = fail "!"
+    insertAuction :: AddAuctionReq -> IO (Either String C.CommandSuccess)
+    insertAuction _ = fail "!"
+

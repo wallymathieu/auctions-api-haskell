@@ -36,7 +36,6 @@ library
                       , regex-base
                       , regex-pcre
                       , array
-                      --, regex
   default-language:    Haskell2010
 
 executable auction-site-exe
@@ -48,6 +47,7 @@ executable auction-site-exe
                      , auction-site
                      , aeson
                      , text
+                     , http-types
   default-language:    Haskell2010
 
 test-suite auction-site-test
