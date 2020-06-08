@@ -15,7 +15,6 @@ import           Data.Aeson                     ( object
                                                 , (.:)
                                                 )
 import qualified Data.Text as T
-import Money
 import Data.Fixed (Pico)
 import Data.Monoid ((<>))
 import           Data.List                      ( intersperse, intercalate )
@@ -30,7 +29,7 @@ data AuctionType=
   deriving (Eq, Generic)
 instance Show AuctionType where
   show (TimedAscending opt) = 
-    intercalate "|" [ "English", (show $ TA.reservePrice opt),( show $ TA.minRaise opt), ( show $ nominalDiffTimeToSeconds $ TA.timeFrame opt)]
+    intercalate "|" [ "English", show $ TA.reservePrice opt, show $ TA.minRaise opt, show $ nominalDiffTimeToSeconds $ TA.timeFrame opt]
   show (SingleSealedBid SB.Blind) = "Blind"
   show (SingleSealedBid SB.Vickrey) = "Vickrey"
 
@@ -40,9 +39,9 @@ instance A.ToJSON AuctionType where
 instance Parser AuctionType where
   parse t=
     case T.splitOn "|" t of
-      "English": a: b: c:[] ->
-        let reservePrice = parse $ a
-            minRaise     = parse $ b
+      ["English", a, b, c] ->
+        let reservePrice = parse a
+            minRaise     = parse b
             timeframe    = readMaybe $ T.unpack c :: Maybe Pico
         in
           case (reservePrice,minRaise,timeframe) of
@@ -53,8 +52,8 @@ instance Parser AuctionType where
                 TA.timeFrame = secondsToNominalDiffTime timeframe'
               }
             _ -> Nothing
-      "Blind":[]   -> pure $ SingleSealedBid SB.Blind
-      "Vickrey":[] -> pure $ SingleSealedBid SB.Vickrey
+      ["Blind"]   -> pure $ SingleSealedBid SB.Blind
+      ["Vickrey"] -> pure $ SingleSealedBid SB.Vickrey
       _            -> Nothing
 
 instance A.FromJSON AuctionType where

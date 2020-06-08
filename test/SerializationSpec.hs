@@ -62,7 +62,7 @@ spec () = do
     it "can read auctiontype" $
       let
         text = "English|VAC0|VAC0|0"
-        decoded = parse $ T.pack $ text
+        decoded = parse $ T.pack text
       in
         decoded `shouldBe` Just timedAscending
 
