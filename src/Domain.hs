@@ -41,5 +41,3 @@ handle state r =
       )
     Nothing -> 
       Left (UnknownAuction aId)
-
-

@@ -6,16 +6,11 @@ import           Data.Monoid      ((<>))
 import           Data.Text        (pack)
 import           GHC.Generics
 import qualified Prelude as P
-import Auctions.Api
-import Auctions.Handlers
 
 -- import qualified Money as M
 import qualified Domain.Prelude as DP
--- import qualified Domain.Auctions as A
--- import qualified Domain.Bids as B
--- import qualified Domain.Commands as C
--- import qualified Domain.SingleSealedBid as DS
--- import qualified Domain.TimedAscending as DT
+import qualified Domain.Auctions as A
+import qualified Domain.Commands as C
 
 
 -- Run a Auction server on localhost:8080
