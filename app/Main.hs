@@ -34,30 +34,25 @@ instance A.ToJSON AddAuctionReq
 instance A.FromJSON AddAuctionReq
 
 main :: IO ()
-main = do
+main =
   scotty 8080 $ do
     get "/auctions" $ do
       auctions <- liftIO readAuctions
       json auctions
     get "/auction/:id" $ do
-      {-
       pid <- param "id"
-      case pid of 
-        Just tid  -> do
-                       Just auction <- liftIO $ readAuction tid
-                       json auction
-        Nothing -> status status404
-        -}
-      status status404 
+      Just auction <- liftIO $ readAuction pid
+      json auction
     post "/auction" $ do
-      {-auctionReq <- jsonData
+      auctionReq <- jsonData
       res <- liftIO $ insertAuction auctionReq
-      json res-}
-      status status404 
+      json res
     post "/auction/:id/bid" $ do
-      {-pid <- param "id"
-      addBidReq <- jsonData-}
-      fail "!"
+      pid <- param "id"
+      Just auction <- liftIO $ readAuction pid
+      addBidReq <- jsonData
+      res <- liftIO $ addBid (auction, addBidReq)
+      json res
   where
     readAuctions :: IO [A.Auction]
     readAuctions = fail "!"
@@ -65,4 +60,6 @@ main = do
     readAuction id = fail "!"
     insertAuction :: AddAuctionReq -> IO (Either String C.CommandSuccess)
     insertAuction _ = fail "!"
+    addBid :: (A.Auction, BidReq) -> IO (Either String C.CommandSuccess)
+    addBid _ = fail "!"
 

@@ -35,3 +35,6 @@ instance FromJSON Command where
       t           -> fail "Unknown command type"
   parseJSON _ = fail "Unexpected json command"
 
+instance ToJSON CommandSuccess where
+  toJSON (AuctionAdded time auction) =  object ["$type" .= String "AuctionAdded", "at" .= time, "auction" .= auction]
+  toJSON (BidAccepted time bid) =  object ["$type" .= String "BidAccepted", "at" .= time, "bid" .= bid]
