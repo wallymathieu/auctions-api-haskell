@@ -5,6 +5,7 @@ import Test.Hspec
 import SampleData
 import Data.Time
 import ApiJson
+import Money
 
 spec:: ()->SpecWith ()
 spec ()=do
@@ -18,7 +19,7 @@ spec ()=do
       let expected = AddAuctionReq { ApiJson.id = sampleAuctionId,
                                      title = "First auction",
                                      startsAt = startsAt, endsAt = endsAt,
-                                     currency = "VAC",
+                                     currency = VAC,
                                      typ = Nothing } in
         firstAuction `shouldBe` Just expected
 

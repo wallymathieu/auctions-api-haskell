@@ -10,6 +10,7 @@ import qualified Domain.Prelude   as DP
 import qualified Domain.Auctions  as A
 import qualified Domain.SingleSealedBid as DS
 import qualified Domain.TimedAscending as DT
+import qualified Money as M
 -- import qualified Domain.Bids as B
 
 newtype ApiError = ApiError { 
@@ -31,7 +32,7 @@ data AddAuctionReq = AddAuctionReq {
   startsAt :: UTCTime,
   title :: String,
   endsAt :: UTCTime,
-  currency :: String,
+  currency :: M.Currency,
   -- TODO should be either of the options in the same format as other implementation:
   typ:: Maybe (Either DS.Options DT.Options) 
 } deriving (Generic, Show, Eq)

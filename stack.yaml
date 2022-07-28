@@ -39,7 +39,10 @@ packages:
 - .
 # Dependency packages to be pulled from upstream that are not in the resolver
 # (e.g., acme-missiles-0.3)
-extra-deps: []
+extra-deps:
+  - Spock-0.14.0.0@sha256:7e86ccc9e66ce0fdb84d1dcd328f852d3754c2dbfcb60d0e7e2f1cce2f32f177,3681
+  - containers-0.5.11.0@sha256:1af9da3baaddc4f4aaea016b07d4c38ddbf702ce3f0df31120531950837996b8,17308
+
 
 # Override default flag values for local packages and extra-deps
 flags: {}
