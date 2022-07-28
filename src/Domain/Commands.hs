@@ -18,3 +18,6 @@ data CommandSuccess =
 
 instance ToJSON Command
 instance FromJSON Command
+
+instance ToJSON CommandSuccess
+instance FromJSON CommandSuccess
