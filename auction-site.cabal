@@ -53,6 +53,7 @@ test-suite auction-site-test
                      , Spock
                      , auction-site
                      , hspec
+                     , aeson
                      , time
                      , hspec
   other-modules:       SampleData
@@ -60,6 +61,7 @@ test-suite auction-site-test
                      , EnglishAuctionStateSpec
                      , VickreyAuctionStateSpec
                      , BlindAuctionStateSpec
+                     , ApiSerializationSpec
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N 
   default-language:    Haskell2010
 
