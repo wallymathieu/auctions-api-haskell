@@ -42,7 +42,11 @@ packages:
 extra-deps:
   - Spock-0.14.0.0@sha256:7e86ccc9e66ce0fdb84d1dcd328f852d3754c2dbfcb60d0e7e2f1cce2f32f177,3681
   - containers-0.5.11.0@sha256:1af9da3baaddc4f4aaea016b07d4c38ddbf702ce3f0df31120531950837996b8,17308
-
+  - Spock-core-0.14.0.1@sha256:f69200f46492847ed681869434c6db9712b3900f49bff3fbc19a5ab2ae4d485b,3467
+  - binary-0.8.9.0@sha256:9cac9a1d86bfa3e7f75cc8bffaa256f3967ebb6d76f67a42f9679384c5c5e18a,6523
+  - reroute-0.7.0.0@sha256:ca982d6c747bee4e089f733cd000b8ccf62fb4312cfb0c5de9c8a33f26e02437,2392
+  - stm-containers-1.2@sha256:a887f2e7692b7cf20e0b081e2d66e21076e2bd4b57016ec59c484edfa2d29397,3244
+  - text-2.0.1@sha256:907ecca6d20c42dafceb709ebac546f5d72e8b7dda3c39b286888c2f09e3bad8,9262
 
 # Override default flag values for local packages and extra-deps
 flags: {}
