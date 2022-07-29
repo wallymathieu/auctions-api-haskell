@@ -47,7 +47,9 @@ extra-deps:
   - reroute-0.7.0.0@sha256:ca982d6c747bee4e089f733cd000b8ccf62fb4312cfb0c5de9c8a33f26e02437,2392
   - stm-containers-1.2@sha256:a887f2e7692b7cf20e0b081e2d66e21076e2bd4b57016ec59c484edfa2d29397,3244
   - text-2.0.1@sha256:907ecca6d20c42dafceb709ebac546f5d72e8b7dda3c39b286888c2f09e3bad8,9262
-
+  - Cabal-3.6.3.0@sha256:ff97c442b0c679c1c9876acd15f73ac4f602b973c45bde42b43ec28265ee48f4,12459
+  - stm-hamt-1.2.0.7@sha256:e8ecba11580ae2ea839cc3b7a25adcce40810aa472b544728790d28804c912ee,3972
+  - text-1.2.5.0@sha256:791f0f6c97ed96113f17ab520cf0efe1a3a4f883a8c85910a5660567c8241c40,7895
 # Override default flag values for local packages and extra-deps
 flags: {}
 
