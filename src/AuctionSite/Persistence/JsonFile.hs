@@ -1,7 +1,7 @@
-module Persistence.JsonFile where
+module AuctionSite.Persistence.JsonFile where
 import Data.Aeson
 
-import qualified Domain.Commands as C
+import qualified AuctionSite.Domain.Commands as C
 import qualified Data.ByteString.Lazy.Char8 as BS
 
 readCommands :: FilePath -> IO (Maybe [C.Command])

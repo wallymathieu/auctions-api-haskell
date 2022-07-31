@@ -1,11 +1,11 @@
 {-# LANGUAGE DeriveGeneric  #-}
-module Domain.Auctions (module Domain.Auctions) where
+module AuctionSite.Domain.Auctions where
 
-import Money
-import Domain.Prelude
-import Domain.Bids
-import qualified Domain.TimedAscending as TA
-import qualified Domain.SingleSealedBid as SB
+import AuctionSite.Money
+import AuctionSite.Domain.Prelude
+import AuctionSite.Domain.Bids
+import qualified AuctionSite.Domain.TimedAscending as TA
+import qualified AuctionSite.Domain.SingleSealedBid as SB
 import GHC.Generics
 import Data.Time
 import Data.Aeson

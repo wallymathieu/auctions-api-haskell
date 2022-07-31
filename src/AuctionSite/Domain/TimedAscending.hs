@@ -1,9 +1,9 @@
 {-# LANGUAGE DeriveGeneric     #-}
-module Domain.TimedAscending (module Domain.TimedAscending) where
-import Money
-import Domain.Prelude
-import qualified Domain.States as S
-import Domain.Bids
+module AuctionSite.Domain.TimedAscending where
+import AuctionSite.Money
+import AuctionSite.Domain.Prelude
+import qualified AuctionSite.Domain.States as S
+import AuctionSite.Domain.Bids
 import GHC.Generics
 import Data.Time
 import qualified Data.Aeson as A
@@ -34,7 +34,7 @@ data State =
 emptyState :: UTCTime -> UTCTime -> Options -> State
 emptyState =AwaitingStart 
   
-instance S.State Domain.TimedAscending.State where
+instance S.State State where
 
   inc now state = 
     case state of 

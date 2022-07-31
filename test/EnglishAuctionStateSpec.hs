@@ -1,14 +1,14 @@
 module EnglishAuctionStateSpec where
-import Domain.Prelude
-import Domain.Auctions
-import Domain.Bids
+import AuctionSite.Domain.Prelude
+import AuctionSite.Domain.Auctions
+import AuctionSite.Domain.Bids
 import SampleData
 import Data.Time
-import Money
-import qualified Domain.States as S
-import qualified Domain.TimedAscending as TA
+import AuctionSite.Money
+import qualified AuctionSite.Domain.States as S
+import qualified AuctionSite.Domain.TimedAscending as TA
 import Test.Hspec
-import AuctionStateSpecs 
+import AuctionStateSpecs
 
 spec:: ()->SpecWith ()
 spec ()=do

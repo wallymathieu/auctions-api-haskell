@@ -1,5 +1,5 @@
 {-# LANGUAGE DeriveGeneric     #-}
-module Money where
+module AuctionSite.Money where
 import GHC.Generics
 import Data.Aeson
 

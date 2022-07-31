@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveGeneric     #-}
-module Domain.Commands (module Domain.Commands) where
-import Domain.Auctions
-import Domain.Bids
+module AuctionSite.Domain.Commands where
+import AuctionSite.Domain.Auctions
+import AuctionSite.Domain.Bids
 import GHC.Generics
 import Data.Time
 import Data.Aeson

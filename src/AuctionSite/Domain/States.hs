@@ -1,9 +1,9 @@
-module Domain.States (module Domain.States) where
-import Domain.Prelude
-import Domain.Bids
+module AuctionSite.Domain.States where
+import AuctionSite.Domain.Prelude
+import AuctionSite.Domain.Bids
 import Data.Time
 import Data.Bifunctor
-import Money
+import AuctionSite.Money
 
 class State a where
   inc :: UTCTime -> a -> a

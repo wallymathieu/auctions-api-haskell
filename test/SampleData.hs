@@ -1,10 +1,10 @@
 module SampleData where
-import Domain.Prelude
-import Domain.Bids
-import Domain.Auctions
-import Domain.SingleSealedBid
+import AuctionSite.Domain.Prelude
+import AuctionSite.Domain.Bids
+import AuctionSite.Domain.Auctions
+import AuctionSite.Domain.SingleSealedBid
+import AuctionSite.Money
 
-import Money
 import Data.Time
 
 sampleAuctionId ::AuctionId

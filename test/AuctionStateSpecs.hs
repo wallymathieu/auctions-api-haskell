@@ -1,5 +1,5 @@
 module AuctionStateSpecs where
-import qualified Domain.States as S
+import qualified AuctionSite.Domain.States as S
 import SampleData
 import Data.Time
 import Test.Hspec

@@ -1,18 +1,18 @@
-module Domain (
-  module Domain,
-  module Domain.Prelude,
-  module Domain.Auctions,
-  module Domain.Bids,
-  module Domain.Commands,
-  module Domain.States
+module AuctionSite.Domain (
+  module AuctionSite.Domain,
+  module AuctionSite.Domain.Prelude,
+  module AuctionSite.Domain.Auctions,
+  module AuctionSite.Domain.Bids,
+  module AuctionSite.Domain.Commands,
+  module AuctionSite.Domain.States
 ) where
 import qualified Data.Map as Map
 import qualified Data.List as List
-import Domain.Prelude
-import Domain.Auctions
-import Domain.Bids
-import Domain.Commands
-import Domain.States
+import AuctionSite.Domain.Prelude
+import AuctionSite.Domain.Auctions
+import AuctionSite.Domain.Bids
+import AuctionSite.Domain.Commands
+import AuctionSite.Domain.States
 
 type Repository = Map.Map AuctionId (Auction, AuctionState)
 

@@ -1,8 +1,8 @@
 {-# LANGUAGE DeriveGeneric     #-}
-module Domain.SingleSealedBid (module Domain.SingleSealedBid) where
-import Domain.Prelude
-import qualified Domain.States as S
-import Domain.Bids
+module AuctionSite.Domain.SingleSealedBid where
+import AuctionSite.Domain.Prelude
+import qualified AuctionSite.Domain.States as S
+import AuctionSite.Domain.Bids
 import qualified Data.Map as Map
 import qualified Data.List as List
 import GHC.Generics

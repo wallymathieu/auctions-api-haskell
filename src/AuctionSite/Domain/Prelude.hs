@@ -1,6 +1,6 @@
-module Domain.Prelude (module Domain.Prelude) where
+module AuctionSite.Domain.Prelude where
 
-import Money
+import AuctionSite.Money
 
 type UserId = String
 type BidId = String

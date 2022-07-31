@@ -4,8 +4,8 @@ import Data.Aeson hiding (json)
 import Test.Hspec
 import SampleData
 import Data.Time
-import ApiJson
-import Money
+import AuctionSite.Web.Types as T
+import AuctionSite.Money
 
 spec:: ()->SpecWith ()
 spec ()=do
@@ -16,7 +16,7 @@ spec ()=do
     let firstAuction = decode "{ \"id\":1,\"startsAt\":\"2016-01-01T00:00:00.000Z\",\"endsAt\":\"2016-02-01T00:00:00.000Z\",\"title\":\"First auction\", \"currency\":\"VAC\" }" :: Maybe AddAuctionReq
 
     it "can understand first auction" $
-      let expected = AddAuctionReq { ApiJson.id = sampleAuctionId,
+      let expected = AddAuctionReq { T.id = sampleAuctionId,
                                      title = "First auction",
                                      startsAt = startsAt, endsAt = endsAt,
                                      currency = VAC,

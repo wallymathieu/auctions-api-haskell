@@ -15,19 +15,23 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:    Money
-                      , Domain
-                      , Domain.Auctions
-                      , Domain.Bids
-                      , Domain.Prelude
-                      , Domain.SingleSealedBid, Domain.TimedAscending, Domain.States
-                      , Domain.Commands
-                      , Persistence.JsonFile
-                      , ApiJson
+  exposed-modules:      AuctionSite.Money
+                      , AuctionSite.Domain
+                      , AuctionSite.Domain.Auctions
+                      , AuctionSite.Domain.Bids
+                      , AuctionSite.Domain.Prelude
+                      , AuctionSite.Domain.SingleSealedBid, AuctionSite.Domain.TimedAscending, AuctionSite.Domain.States
+                      , AuctionSite.Domain.Commands
+                      , AuctionSite.Persistence.JsonFile
+                      , AuctionSite.Web.Types
+                      , AuctionSite.Web.App
   other-modules:
   build-depends:       base >= 4.9 && < 5
                       , containers >= 0.5 && <0.6
                       , aeson >= 1.3
+                      , Spock
+                      , http-types >= 0.12
+                      , aeson
                       , text
                       , time
                       , bytestring
