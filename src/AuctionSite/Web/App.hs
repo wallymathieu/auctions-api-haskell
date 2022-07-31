@@ -80,3 +80,8 @@ app = do
   get ("auction" <//> var) getAuctionAction
   post "auction" createAuctionAction
   post ("auction" <//> var <//> "bid") createBidAction
+
+initAppState :: IO AppState
+initAppState = atomically $ do
+    auctions <- newTVar []
+    return (AppState {auctions=auctions})
