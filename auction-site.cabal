@@ -61,6 +61,7 @@ test-suite auction-site-test
                      , time
                      , hspec
                      , hspec-wai
+                     , hspec-wai-json
   other-modules:       SampleData
                      , AuctionStateSpecs
                      , EnglishAuctionStateSpec

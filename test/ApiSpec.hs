@@ -1,7 +1,8 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings, QuasiQuotes #-}
 module ApiSpec where
 import Test.Hspec
 import Test.Hspec.Wai
+import Test.Hspec.Wai.JSON
 import Web.Spock (spockAsApp, spock)
 import Web.Spock.Config
 import GHC.Conc
@@ -25,7 +26,8 @@ spec =
                   it "possible to add bid to auction" $ do
                       post "/auction" firstAuctionJson `shouldRespondWith` 200
                       post "/auction/1/bid" "{\"amount\":10}" `shouldRespondWith` 200
-                  it "returns auctions" $ do
+                  it "returns auction" $ do
                       post "/auction" firstAuctionJson `shouldRespondWith` 200
-                      get "/auctions" `shouldRespondWith` "[{\"currency\":\"VAC\",\"expiry\":\"2019-01-01T10:00:00Z\",\"id\":1,\"startsAt\":\"2018-01-01T10:00:00Z\",\"title\":\"First auction\"}]" {matchStatus = 200}
-
+                      get "/auction/1" `shouldRespondWith` auctionJson {matchStatus = 200}
+                      get "/auctions" `shouldRespondWith` 200
+                where auctionJson = [json|{currency: "VAC", expiry: "2019-01-01T10:00:00Z", id:1, startsAt: "2018-01-01T10:00:00Z", title: "First auction"}|]
