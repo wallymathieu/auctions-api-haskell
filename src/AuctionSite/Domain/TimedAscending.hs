@@ -56,15 +56,16 @@ instance S.State State where
         state
 
   addBid bid state = 
-    let now = at bid in
-    let auctionId = forAuction bid in
-    let bAmount = bidAmount bid in
+    let now = at bid
+        auctionId = forAuction bid
+        bAmount = bidAmount bid
+    in
     case state of 
         AwaitingStart start startingExpiry opt ->
           case (now > start, now < startingExpiry) of 
             (True,True) -> 
-              let nextExpiry = max startingExpiry (addUTCTime (timeFrame opt) now) in
-              -- AwaitingStart -> OnGoing B++
+              let nextExpiry = max startingExpiry (addUTCTime (timeFrame opt) now) 
+              in -- AwaitingStart -> OnGoing B++
               (OnGoing [bid] nextExpiry opt, Right ())
             (True, False) -> (HasEnded [] startingExpiry opt, Right ())
             _ -> -- AwaitingStart -> AwaitingStart !
@@ -73,14 +74,15 @@ instance S.State State where
           if now<nextExpiry then
             case bids of
             [] -> 
-              let nextExpiry' = max nextExpiry (addUTCTime (timeFrame opt) now) in
-                -- OnGoing -> OnGoing B++
+              let nextExpiry' = max nextExpiry (addUTCTime (timeFrame opt) now)
+              in -- OnGoing -> OnGoing B++
               (OnGoing (bid:bids) nextExpiry' opt, Right())
             highestBid:_ -> 
               -- you cannot bid lower than the "current bid"
-              let highestBidAmount = bidAmount highestBid in
-              let nextExpiry' = max nextExpiry (addUTCTime (timeFrame opt) now) in
-              let minRaiseAmount = minRaise opt in
+              let highestBidAmount = bidAmount highestBid
+                  nextExpiry' = max nextExpiry (addUTCTime (timeFrame opt) now)
+                  minRaiseAmount = minRaise opt 
+              in
               if bAmount > amountAdd highestBidAmount minRaiseAmount then
                 -- OnGoing -> OnGoing B++
                 (OnGoing (bid:bids) nextExpiry' opt, Right())

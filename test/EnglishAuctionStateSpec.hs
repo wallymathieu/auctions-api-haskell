@@ -38,12 +38,12 @@ spec ()=do
       stateEndedAfterTwoBids `shouldBe` Right (TA.HasEnded [ bid2, bid1 ] sampleEndsAt (TA.defaultOptions SEK))
 
     it "cant bid after auction has ended" $
-      let errAfterEnded=snd (S.addBid sampleBid stateEndedAfterTwoBids) in
-      errAfterEnded `shouldBe` Left (AuctionHasEnded 1)
+      let errAfterEnded=snd (S.addBid sampleBid stateEndedAfterTwoBids)
+      in errAfterEnded `shouldBe` Left (AuctionHasEnded 1)
   
     it "can get winner and price from an auction" $
-      let maybeAmountAndWinner = S.tryGetAmountAndWinner stateEndedAfterTwoBids in
-      maybeAmountAndWinner `shouldBe` Just (bidAmount2, buyer2)
+      let maybeAmountAndWinner = S.tryGetAmountAndWinner stateEndedAfterTwoBids
+      in maybeAmountAndWinner `shouldBe` Just (bidAmount2, buyer2)
 
     let (_,maybeFail) = S.addBid bid_less_than_2 stateWith2Bids
     it "can't place bid lower than highest bid" $

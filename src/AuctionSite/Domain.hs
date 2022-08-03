@@ -23,20 +23,24 @@ handle:: Command -> Repository -> Either Errors (Repository,CommandSuccess)
 handle state r =
   case state of 
   AddAuction time auction ->
-    let aId = auctionId auction in
+    let aId = auctionId auction 
+    in
     if not (Map.member aId r) then
-      let empty = emptyState auction in
-      let newR= Map.insert aId (auction, empty) r in
+      let empty = emptyState auction
+          newR= Map.insert aId (auction, empty) r 
+      in
       Right (newR, AuctionAdded time auction)
     else
       Left (AuctionAlreadyExists aId)
   PlaceBid time bid ->
-    let aId = forAuction bid in
+    let aId = forAuction bid
+    in
     case Map.lookup aId r of
     Just (auction,state') ->
       validateBid bid auction >>= (\()->
-        let (next, res)= addBid bid state' in
-        let newR= Map.insert aId (auction, next) r in
+        let (next, res)= addBid bid state'
+            newR= Map.insert aId (auction, next) r
+        in
           res >>= (\() -> Right (newR, BidAccepted time bid) )
       )
     Nothing -> 

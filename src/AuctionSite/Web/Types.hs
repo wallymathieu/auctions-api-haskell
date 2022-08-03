@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveGeneric     #-}
+{-# LANGUAGE OverloadedStrings #-}
 module AuctionSite.Web.Types where
 import           Data.Aeson       hiding (json)
 import           GHC.Generics
@@ -6,7 +7,13 @@ import           GHC.Conc         (TVar)
 import           Prelude
 import           Data.Time        (UTCTime)
 import           Web.Spock        (SpockM, SpockAction)
+import           Control.Applicative
+import           Control.Monad    (mzero)
+import           Data.Maybe       (fromMaybe)
+import           Data.Aeson.Types (Parser)
+import qualified Data.Map         as Map
 
+import qualified AuctionSite.Domain           as D
 import qualified AuctionSite.Domain.Prelude   as DP
 import qualified AuctionSite.Domain.Auctions  as A
 import qualified AuctionSite.Domain.Bids      as B
@@ -35,14 +42,29 @@ data AddAuctionReq = AddAuctionReq {
   endsAt :: UTCTime,
   currency :: M.Currency,
   -- TODO should be either of the options in the same format as other implementation:
-  typ:: Maybe (Either DS.Options DT.Options)
+  typ:: A.AuctionType
 } deriving (Generic, Show, Eq)
 
-instance ToJSON AddAuctionReq
-instance FromJSON AddAuctionReq
 
-data AppAuctionState = AppAuctionState { auction:: A.Auction, auctionState:: A.AuctionState, auctionBids:: [ B.Bid ] }
-newtype AppState = AppState { auctions :: TVar [AppAuctionState] }
+instance FromJSON AddAuctionReq where
+ parseJSON (Object v) =
+      AddAuctionReq <$> v .: "id"
+                    <*> v .: "startsAt"
+                    <*> v .: "title"
+                    <*> v .: "endsAt"
+                    <*> currency
+                    <*> parseTyp
+    where
+      currency = (v .: "currency") <|> pure M.VAC
+      zero c = M.Amount c 0
+      defaultTyp:: M.Currency -> A.AuctionType
+      defaultTyp currency = A.TimedAscending $ DT.Options { DT.reservePrice = zero currency, DT.minRaise = zero currency, DT.timeFrame = 0.0 }
+      parseTyp :: Parser A.AuctionType
+      parseTyp = currency >>= (\c -> (v .: "typ") <|> pure (defaultTyp c))
+ parseJSON _ = mzero
+
+
+newtype AppState = AppState { auctions :: TVar D.Repository }
 
 type Api = SpockM () () AppState ()
 

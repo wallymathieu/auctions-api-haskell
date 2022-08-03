@@ -40,8 +40,9 @@ instance S.State State where
     DisclosingBids {}-> state
 
   addBid bid state = 
-    let auctionId= forAuction bid in
-    let user= bidder bid in
+    let auctionId= forAuction bid
+        user= bidder bid
+    in
     case state of
       AcceptingBids bids expiry opt-> 
         case (at bid>=expiry, Map.member user bids ) of

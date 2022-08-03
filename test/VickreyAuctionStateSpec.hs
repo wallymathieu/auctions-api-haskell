@@ -31,7 +31,7 @@ spec ()=do
       stateEndedAfterTwoBids `shouldBe` Left (SB.DisclosingBids [ bid2, bid1 ] sampleEndsAt SB.Vickrey)
 
     it "can get winner and price from an ended auction" $
-      let maybeAmountAndWinner = S.tryGetAmountAndWinner stateEndedAfterTwoBids in
-      maybeAmountAndWinner `shouldBe` Just (bidAmount1, buyer2)
+      let maybeAmountAndWinner = S.tryGetAmountAndWinner stateEndedAfterTwoBids
+      in maybeAmountAndWinner `shouldBe` Just (bidAmount1, buyer2)
 
     incrementSpec emptyVickreyAuctionState

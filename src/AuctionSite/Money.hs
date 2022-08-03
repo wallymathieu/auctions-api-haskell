@@ -33,3 +33,4 @@ instance FromJSON Currency
 
 instance ToJSON Amount
 instance FromJSON Amount
+  

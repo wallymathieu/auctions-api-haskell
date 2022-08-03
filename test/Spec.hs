@@ -2,6 +2,7 @@ import qualified EnglishAuctionStateSpec as English
 import qualified VickreyAuctionStateSpec as Vickrey
 import qualified BlindAuctionStateSpec as Blind
 import qualified ApiSerializationSpec
+import qualified ApiSpec
 import Test.Hspec
 
 main :: IO ()
@@ -10,3 +11,4 @@ main = hspec $ do
   Vickrey.spec()
   Blind.spec()
   ApiSerializationSpec.spec()
+  ApiSpec.spec
