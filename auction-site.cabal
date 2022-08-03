@@ -25,6 +25,7 @@ library
                       , AuctionSite.Persistence.JsonFile
                       , AuctionSite.Web.Types
                       , AuctionSite.Web.App
+  ghc-options:        -Wall
   other-modules:
   build-depends:       base >= 4.9 && < 5
                       , containers >= 0.5 && <0.6

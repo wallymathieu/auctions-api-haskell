@@ -26,6 +26,8 @@ spec =
                   it "possible to add bid to auction" $ do
                       post "/auction" firstAuctionJson `shouldRespondWith` 200
                       post "/auction/1/bid" "{\"amount\":10}" `shouldRespondWith` 200
+                  it "not possible to add bid to non existant auction" $ do
+                      post "/auction/2/bid" "{\"amount\":10}" `shouldRespondWith` "Auction not found" {matchStatus = 404}
                   it "returns auction" $ do
                       post "/auction" firstAuctionJson `shouldRespondWith` 200
                       get "/auction/1" `shouldRespondWith` auctionJson {matchStatus = 200}

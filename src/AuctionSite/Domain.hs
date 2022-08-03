@@ -21,15 +21,14 @@ auctions r = List.map fst (Map.elems r)
 
 handle:: Command -> Repository -> Either Errors (Repository,CommandSuccess)
 handle state r =
-  case state of 
+  case state of
   AddAuction time auction ->
-    let aId = auctionId auction 
+    let aId = auctionId auction
     in
     if not (Map.member aId r) then
       let empty = emptyState auction
-          newR= Map.insert aId (auction, empty) r 
-      in
-      Right (newR, AuctionAdded time auction)
+          newR= Map.insert aId (auction, empty) r
+      in Right (newR, AuctionAdded time auction)
     else
       Left (AuctionAlreadyExists aId)
   PlaceBid time bid ->
@@ -37,13 +36,12 @@ handle state r =
     in
     case Map.lookup aId r of
     Just (auction,state') ->
-      validateBid bid auction >>= (\()->
-        let (next, res)= addBid bid state'
-            newR= Map.insert aId (auction, next) r
+      validateBid bid auction >> 
+        let (nextAuctionState, res) = addBid bid state'
+            newR = Map.insert aId (auction, nextAuctionState) r
         in
-          res >>= (\() -> Right (newR, BidAccepted time bid) )
-      )
-    Nothing -> 
+          res >> Right (newR, BidAccepted time bid)
+    Nothing ->
       Left (UnknownAuction aId)
 
 

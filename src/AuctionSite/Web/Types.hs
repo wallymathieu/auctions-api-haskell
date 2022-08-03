@@ -1,5 +1,4 @@
-{-# LANGUAGE DeriveGeneric     #-}
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE DeriveGeneric, OverloadedStrings #-}
 module AuctionSite.Web.Types where
 import           Data.Aeson       hiding (json)
 import           GHC.Generics
@@ -9,20 +8,17 @@ import           Data.Time        (UTCTime)
 import           Web.Spock        (SpockM, SpockAction)
 import           Control.Applicative
 import           Control.Monad    (mzero)
-import           Data.Maybe       (fromMaybe)
 import           Data.Aeson.Types (Parser)
-import qualified Data.Map         as Map
+import qualified Data.Text       as T
 
 import qualified AuctionSite.Domain           as D
 import qualified AuctionSite.Domain.Prelude   as DP
 import qualified AuctionSite.Domain.Auctions  as A
-import qualified AuctionSite.Domain.Bids      as B
-import qualified AuctionSite.Domain.SingleSealedBid as DS
 import qualified AuctionSite.Domain.TimedAscending as DT
 import qualified AuctionSite.Money as M
 
 newtype ApiError = ApiError {
-  message:: String
+  message:: T.Text
 } deriving (Generic, Show, Eq)
 
 instance ToJSON ApiError
@@ -52,15 +48,12 @@ instance FromJSON AddAuctionReq where
                     <*> v .: "startsAt"
                     <*> v .: "title"
                     <*> v .: "endsAt"
-                    <*> currency
+                    <*> parseCurrency
                     <*> parseTyp
     where
-      currency = (v .: "currency") <|> pure M.VAC
-      zero c = M.Amount c 0
-      defaultTyp:: M.Currency -> A.AuctionType
-      defaultTyp currency = A.TimedAscending $ DT.Options { DT.reservePrice = zero currency, DT.minRaise = zero currency, DT.timeFrame = 0.0 }
+      parseCurrency = (v .: "currency") <|> pure M.VAC
       parseTyp :: Parser A.AuctionType
-      parseTyp = currency >>= (\c -> (v .: "typ") <|> pure (defaultTyp c))
+      parseTyp = parseCurrency >>= (\c -> (v .: "typ") <|> pure (A.TimedAscending $ DT.defaultOptions c))
  parseJSON _ = mzero
 
 

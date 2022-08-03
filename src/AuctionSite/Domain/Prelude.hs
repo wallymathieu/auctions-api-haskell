@@ -13,7 +13,6 @@ data Errors =
   | AuctionAlreadyExists AuctionId
   | AuctionHasEnded AuctionId
   | AuctionHasNotStarted AuctionId
-  | AuctionNotFound AuctionId
   | SellerCannotPlaceBids (UserId , AuctionId)
   | BidCurrencyConversion (BidId , Currency)
   | CurrencyConversion
