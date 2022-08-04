@@ -1,4 +1,4 @@
-module AuctionSite.Domain.Prelude where
+module AuctionSite.Domain.Core where
 import AuctionSite.Money
 
 type UserId = String

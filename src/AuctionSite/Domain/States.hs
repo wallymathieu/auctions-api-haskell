@@ -1,5 +1,5 @@
 module AuctionSite.Domain.States where
-import AuctionSite.Domain.Prelude
+import AuctionSite.Domain.Core
 import AuctionSite.Domain.Bids
 import Data.Time
 import Data.Bifunctor

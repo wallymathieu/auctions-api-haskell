@@ -19,7 +19,7 @@ library
                       , AuctionSite.Domain
                       , AuctionSite.Domain.Auctions
                       , AuctionSite.Domain.Bids
-                      , AuctionSite.Domain.Prelude
+                      , AuctionSite.Domain.Core
                       , AuctionSite.Domain.SingleSealedBid, AuctionSite.Domain.TimedAscending, AuctionSite.Domain.States
                       , AuctionSite.Domain.Commands
                       , AuctionSite.Persistence.JsonFile

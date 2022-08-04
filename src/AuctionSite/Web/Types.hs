@@ -11,9 +11,7 @@ import           Control.Monad    (mzero)
 import           Data.Aeson.Types (Parser)
 import qualified Data.Text       as T
 
-import qualified AuctionSite.Domain           as D
-import qualified AuctionSite.Domain.Prelude   as DP
-import qualified AuctionSite.Domain.Auctions  as A
+import           AuctionSite.Domain
 import qualified AuctionSite.Domain.TimedAscending as DT
 import qualified AuctionSite.Money as M
 
@@ -32,13 +30,13 @@ instance ToJSON BidReq
 instance FromJSON BidReq
 
 data AddAuctionReq = AddAuctionReq {
-  id :: DP.AuctionId,
-  startsAt :: UTCTime,
-  title :: String,
-  endsAt :: UTCTime,
-  currency :: M.Currency,
+  reqId :: AuctionId,
+  reqStartsAt :: UTCTime,
+  reqTitle :: String,
+  reqEndsAt :: UTCTime,
+  reqCurrency :: M.Currency,
   -- TODO should be either of the options in the same format as other implementation:
-  typ:: A.AuctionType
+  reqTyp :: AuctionType
 } deriving (Generic, Show, Eq)
 
 
@@ -52,12 +50,12 @@ instance FromJSON AddAuctionReq where
                     <*> parseTyp
     where
       parseCurrency = (v .: "currency") <|> pure M.VAC
-      parseTyp :: Parser A.AuctionType
-      parseTyp = parseCurrency >>= (\c -> (v .: "typ") <|> pure (A.TimedAscending $ DT.defaultOptions c))
+      parseTyp :: Parser AuctionType
+      parseTyp = parseCurrency >>= (\c -> (v .: "typ") <|> pure (TimedAscending $ DT.defaultOptions c))
  parseJSON _ = mzero
 
 
-newtype AppState = AppState { auctions :: TVar D.Repository }
+newtype AppState = AppState { appAuctions :: TVar Repository }
 
 type Api = SpockM () () AppState ()
 

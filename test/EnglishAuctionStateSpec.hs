@@ -1,5 +1,5 @@
 module EnglishAuctionStateSpec where
-import AuctionSite.Domain.Prelude
+import AuctionSite.Domain.Core
 import AuctionSite.Domain.Auctions
 import SampleData
 import AuctionSite.Money

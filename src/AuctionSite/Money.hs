@@ -4,12 +4,9 @@ import GHC.Generics
 import Data.Aeson
 
 data Currency = 
-  -- virtual acution currency
-  VAC
-  -- Swedish 'Krona'
-  |SEK
-  -- Danish 'Krone'
-  |DKK
+  VAC -- ^ virtual acution currency
+  |SEK -- ^ Swedish 'Krona'
+  |DKK -- ^ Danish 'Krone'
   deriving (Generic, Show, Eq, Ord)
 
 data Amount = Amount Currency Integer

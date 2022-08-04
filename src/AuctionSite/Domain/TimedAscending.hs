@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveGeneric     #-}
 module AuctionSite.Domain.TimedAscending where
 import AuctionSite.Money
-import AuctionSite.Domain.Prelude
+import AuctionSite.Domain.Core
 import qualified AuctionSite.Domain.States as S
 import AuctionSite.Domain.Bids
 import GHC.Generics

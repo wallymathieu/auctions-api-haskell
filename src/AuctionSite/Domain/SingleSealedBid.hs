@@ -1,6 +1,6 @@
 {-# LANGUAGE DeriveGeneric     #-}
 module AuctionSite.Domain.SingleSealedBid where
-import AuctionSite.Domain.Prelude
+import AuctionSite.Domain.Core
 import qualified AuctionSite.Domain.States as S
 import AuctionSite.Domain.Bids
 import qualified Data.Map as Map

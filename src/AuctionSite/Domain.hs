@@ -1,14 +1,28 @@
 module AuctionSite.Domain (
-  module AuctionSite.Domain,
-  module AuctionSite.Domain.Prelude,
-  module AuctionSite.Domain.Auctions,
-  module AuctionSite.Domain.Bids,
-  module AuctionSite.Domain.Commands,
-  module AuctionSite.Domain.States
+  -- auctions
+  AuctionType (..),
+  Auction (..),
+  emptyState,
+  validateBid,
+  -- bids
+  Bid (..),
+  -- core
+  Errors (..),
+  UserId,
+  AuctionId,
+  -- state
+  State (..),
+  Repository,
+  -- commands
+  Command (..),
+  CommandSuccess (..),
+  -- domain
+  auctions,
+  handle
 ) where
 import qualified Data.Map as Map
 import qualified Data.List as List
-import AuctionSite.Domain.Prelude
+import AuctionSite.Domain.Core
 import AuctionSite.Domain.Auctions
 import AuctionSite.Domain.Bids
 import AuctionSite.Domain.Commands
@@ -18,30 +32,35 @@ type Repository = Map.Map AuctionId (Auction, AuctionState)
 
 auctions::Repository -> [Auction]
 auctions r = List.map fst (Map.elems r)
-
-handle:: Command -> Repository -> Either Errors (Repository,CommandSuccess)
-handle state r =
+handle:: Command -> Repository -> (Either Errors CommandSuccess, Repository)
+handle state repository =
   case state of
   AddAuction time auction ->
     let aId = auctionId auction
     in
-    if not (Map.member aId r) then
+    if not (Map.member aId repository) then
       let empty = emptyState auction
-          newR= Map.insert aId (auction, empty) r
-      in Right (newR, AuctionAdded time auction)
+          nextRepository= Map.insert aId (auction, empty) repository
+      in successOf (AuctionAdded time auction) nextRepository
     else
-      Left (AuctionAlreadyExists aId)
+      failureOf $ AuctionAlreadyExists aId
   PlaceBid time bid ->
     let aId = forAuction bid
     in
-    case Map.lookup aId r of
+    case Map.lookup aId repository of
     Just (auction,state') ->
-      validateBid bid auction >> 
-        let (nextAuctionState, res) = addBid bid state'
-            newR = Map.insert aId (auction, nextAuctionState) r
+      case validateBid bid auction of
+      Right _ ->
+        let (nextAuctionState, bidResult) = addBid bid state'
+            nextRepository = Map.insert aId (auction, nextAuctionState) repository
         in
-          res >> Right (newR, BidAccepted time bid)
+          case bidResult of
+          Right _ -> successOf (BidAccepted time bid) nextRepository
+          Left err -> failureOf err
+      Left err -> failureOf err
     Nothing ->
-      Left (UnknownAuction aId)
-
+      failureOf $ UnknownAuction aId
+  where
+    failureOf failure = (Left failure, repository)
+    successOf success nextRepo = (Right success, nextRepo)
 

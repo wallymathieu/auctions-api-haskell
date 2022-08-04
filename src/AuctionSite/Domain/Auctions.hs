@@ -2,7 +2,7 @@
 module AuctionSite.Domain.Auctions where
 
 import AuctionSite.Money
-import AuctionSite.Domain.Prelude
+import AuctionSite.Domain.Core
 import AuctionSite.Domain.Bids
 import qualified AuctionSite.Domain.TimedAscending as TA
 import qualified AuctionSite.Domain.SingleSealedBid as SB

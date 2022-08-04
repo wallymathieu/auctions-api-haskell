@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveGeneric     #-}
 module AuctionSite.Domain.Bids where
 import AuctionSite.Money
-import AuctionSite.Domain.Prelude
+import AuctionSite.Domain.Core
 import GHC.Generics
 import Data.Time
 import Data.Aeson

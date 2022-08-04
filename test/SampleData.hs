@@ -1,9 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module SampleData where
 import           Data.Time
-import           AuctionSite.Domain.Prelude
-import           AuctionSite.Domain.Bids
-import           AuctionSite.Domain.Auctions
+import           AuctionSite.Domain
 import           AuctionSite.Domain.SingleSealedBid
 import           AuctionSite.Money
 
