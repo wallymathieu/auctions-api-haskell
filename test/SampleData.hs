@@ -1,8 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 module SampleData where
 import           Data.Time
-import           Data.Aeson (Value(..), object, (.=))
-
 import           AuctionSite.Domain.Prelude
 import           AuctionSite.Domain.Bids
 import           AuctionSite.Domain.Auctions

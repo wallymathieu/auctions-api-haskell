@@ -1,9 +1,6 @@
 module BlindAuctionStateSpec where
-import AuctionSite.Domain.Prelude
 import AuctionSite.Domain.Auctions
-import AuctionSite.Domain.Bids
 import SampleData
-import Data.Time
 import qualified AuctionSite.Domain.States as S
 import qualified AuctionSite.Domain.SingleSealedBid as SB
 import Test.Hspec

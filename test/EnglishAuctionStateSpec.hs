@@ -1,9 +1,7 @@
 module EnglishAuctionStateSpec where
 import AuctionSite.Domain.Prelude
 import AuctionSite.Domain.Auctions
-import AuctionSite.Domain.Bids
 import SampleData
-import Data.Time
 import AuctionSite.Money
 import qualified AuctionSite.Domain.States as S
 import qualified AuctionSite.Domain.TimedAscending as TA

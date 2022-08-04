@@ -9,10 +9,9 @@ import qualified AuctionSite.Web.Types as T
 import qualified AuctionSite.Domain.TimedAscending as DT
 import qualified AuctionSite.Money as M
 
-zeroVAC = M.Amount M.VAC 0
-
 spec:: ()->SpecWith ()
 spec ()=do
+  let zeroVAC = M.Amount M.VAC 0
 
   describe "auction deserialization" $ do
     let startsAt = read "2016-01-01 00:00:00.000000 UTC"::UTCTime 

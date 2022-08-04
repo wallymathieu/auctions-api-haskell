@@ -5,8 +5,6 @@ import           Test.Hspec.Wai
 import           Test.Hspec.Wai.JSON ( FromValue(fromValue) )
 import           Web.Spock (spockAsApp, spock)
 import           Web.Spock.Config
-import           GHC.Conc
-import           Test.Hspec.Wai.Matcher
 import           Data.Aeson
 import           Data.Vector
 import           AuctionSite.Web.App

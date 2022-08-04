@@ -25,7 +25,7 @@ library
                       , AuctionSite.Persistence.JsonFile
                       , AuctionSite.Web.Types
                       , AuctionSite.Web.App
-  ghc-options:        -Wall
+  ghc-options:        -Wall -fwarn-tabs
   other-modules:
   build-depends:       base >= 4.9 && < 5
                       , containers >= 0.5 && <0.6
@@ -55,6 +55,7 @@ test-suite auction-site-test
   type:                exitcode-stdio-1.0
   hs-source-dirs:      test
   main-is:             Spec.hs
+  ghc-options:        -Wall -fwarn-tabs
   build-depends:       base
                      , Spock
                      , auction-site

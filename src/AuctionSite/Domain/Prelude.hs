@@ -1,5 +1,4 @@
 module AuctionSite.Domain.Prelude where
-
 import AuctionSite.Money
 
 type UserId = String
