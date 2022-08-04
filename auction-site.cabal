@@ -63,6 +63,7 @@ test-suite auction-site-test
                      , hspec
                      , hspec-wai
                      , hspec-wai-json
+                     , vector
   other-modules:       SampleData
                      , AuctionStateSpecs
                      , EnglishAuctionStateSpec

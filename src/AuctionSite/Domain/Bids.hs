@@ -6,7 +6,7 @@ import GHC.Generics
 import Data.Time
 import Data.Aeson
 
-data Bid = Bid { bidId :: BidId,
+data Bid = Bid {
   forAuction :: AuctionId,
   bidder :: UserId,
   at :: UTCTime,

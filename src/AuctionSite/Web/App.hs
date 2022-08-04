@@ -51,7 +51,7 @@ createBidAction tid = do
   auctionId = tid::DP.AuctionId
   mutateState :: BidReq->UTCTime -> D.Repository -> (Either DP.Errors C.CommandSuccess, D.Repository)
   mutateState BidReq { amount=amount' } now current =
-    let bid = B.Bid { B.bidId="TODO1", B.bidder="TODO2", B.at=now, B.bidAmount=M.Amount M.VAC amount', B.forAuction=auctionId }
+    let bid = B.Bid { B.bidder="TODO2", B.at=now, B.bidAmount=M.Amount M.VAC amount', B.forAuction=auctionId }
         command = C.PlaceBid now bid
     in case D.handle command current of
        Left err->(Left err,current)

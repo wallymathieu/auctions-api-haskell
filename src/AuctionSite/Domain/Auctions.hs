@@ -32,7 +32,7 @@ validateBid bid auction
   | bidder bid == seller auction =
     Left (SellerCannotPlaceBids (bidder bid, auctionId auction))
   | amountCurrency (bidAmount bid) /= auctionCurrency auction =
-    Left (BidCurrencyConversion (bidId bid, auctionCurrency auction))
+    Left (CurrencyConversion (auctionCurrency auction))
   | otherwise = Right ()
 
 type AuctionState = Either SB.State TA.State

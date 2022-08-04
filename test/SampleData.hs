@@ -1,16 +1,17 @@
+{-# LANGUAGE OverloadedStrings #-}
 module SampleData where
-import AuctionSite.Domain.Prelude
-import AuctionSite.Domain.Bids
-import AuctionSite.Domain.Auctions
-import AuctionSite.Domain.SingleSealedBid
-import AuctionSite.Money
+import           Data.Time
+import           Data.Aeson (Value(..), object, (.=))
 
-import Data.Time
+import           AuctionSite.Domain.Prelude
+import           AuctionSite.Domain.Bids
+import           AuctionSite.Domain.Auctions
+import           AuctionSite.Domain.SingleSealedBid
+import           AuctionSite.Money
+
 
 sampleAuctionId ::AuctionId
 sampleAuctionId = 1::AuctionId
-sampleBidId :: BidId
-sampleBidId = "calfless-bloc-able-lose-cobblebefell"::BidId
 sampleTitle :: String
 sampleTitle = "auction"
 sampleStartsAt :: UTCTime
@@ -34,12 +35,13 @@ sampleAuctionOfTyp typ' = Auction { auctionId = sampleAuctionId,
   typ= typ'
 }
 
-sampleAuction:: ()-> Auction
-sampleAuction ()=sampleAuctionOfTyp (SingleSealedBid Vickrey)
+sampleAuction:: Auction
+sampleAuction =sampleAuctionOfTyp (SingleSealedBid Vickrey)
+
 sek :: Integer -> Amount
-sek =Amount SEK
+sek = Amount SEK
 sampleBid :: Bid
-sampleBid = Bid { bidId =sampleBidId,
+sampleBid = Bid {
   forAuction =sampleAuctionId,
   bidder = sampleBuyer,
   at = sampleBidTime,
@@ -54,8 +56,7 @@ buyer3 = "Buyer_3"::UserId
 bidAmount1 :: Amount
 bidAmount1 = sek 10
 bid1 :: Bid
-bid1 =  Bid { 
-  bidId= "baseless-leaf-olds-fade-sledsdebases"::BidId,
+bid1 =  Bid {
   bidder = buyer1,
   bidAmount = bidAmount1,
   forAuction = sampleAuctionId,
@@ -64,16 +65,14 @@ bid1 =  Bid {
 bidAmount2 :: Amount
 bidAmount2 = sek 12
 bid2 :: Bid
-bid2 = Bid { 
-  bidId= "doesbead-olds-base-ease-addedblesses"::BidId,
+bid2 = Bid {
   bidder = buyer2,
   bidAmount = bidAmount2,
   forAuction = sampleAuctionId,
   at = addUTCTime (toEnum 2) sampleStartsAt
 }
 bid_less_than_2 :: Bid
-bid_less_than_2 = Bid { 
-  bidId= "cascades-bell-loco-docs-leasescobbed"::BidId,
+bid_less_than_2 = Bid {
   bidder = buyer3,
   bidAmount = sek 11,
   forAuction = sampleAuctionId,
