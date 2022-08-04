@@ -55,7 +55,7 @@ test-suite auction-site-test
   type:                exitcode-stdio-1.0
   hs-source-dirs:      test
   main-is:             Spec.hs
-  ghc-options:        -Wall -fwarn-tabs
+  ghc-options:        -Wall -fwarn-tabs -Wno-missing-signatures
   build-depends:       base
                      , Spock
                      , auction-site

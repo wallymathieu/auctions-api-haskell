@@ -25,10 +25,8 @@ spec ()=do
     it "can add second bid" $
       result2 `shouldBe` Right ()
 
-    let stateEnded = S.inc sampleEndsAt emptyAscAuctionState 
-
     it "can end" $
-      stateEnded `shouldBe` Right (TA.HasEnded [] sampleEndsAt (TA.defaultOptions SEK))
+      emptyEndedAscAuctionState `shouldBe` Right (TA.HasEnded [] sampleEndsAt (TA.defaultOptions SEK))
 
     let stateEndedAfterTwoBids = S.inc sampleEndsAt stateWith2Bids
 
