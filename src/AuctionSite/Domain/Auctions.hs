@@ -9,18 +9,28 @@ import qualified AuctionSite.Domain.SingleSealedBid as SB
 import GHC.Generics
 import Data.Time
 import Data.Aeson
+import Text.Read (readMaybe)
+import Control.Applicative ((<|>))
 
 data AuctionType=
   {- also known as an open ascending price auction
   The auction ends when no participant is willing to bid further -}
   TimedAscending TA.Options
   | SingleSealedBid SB.Options
-  deriving (Eq, Generic, Show)
-
+  deriving (Eq, Generic)
+instance Show AuctionType where
+  show (TimedAscending opt) = show opt
+  show (SingleSealedBid opt) = show opt
+instance Read AuctionType where
+  readsPrec _ v = interpret readMaybeTyp
+    where
+    readMaybeTyp = ( TimedAscending <$> readMaybe v ) <|> ( SingleSealedBid <$> readMaybe v )
+    interpret (Just auctionType) = [(auctionType,"")]
+    interpret Nothing = []
 data Auction = Auction { auctionId :: AuctionId,
   startsAt :: UTCTime,
   title :: String,
-  -- initial expiry
+  -- | initial expiry
   expiry :: UTCTime,
   seller :: UserId,
   typ :: AuctionType,

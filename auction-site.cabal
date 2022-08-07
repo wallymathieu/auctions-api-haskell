@@ -16,6 +16,7 @@ cabal-version:       >=1.10
 library
   hs-source-dirs:      src
   exposed-modules:      AuctionSite.Money
+                      , AuctionSite.Aeson
                       , AuctionSite.Domain
                       , AuctionSite.Domain.Auctions
                       , AuctionSite.Domain.Bids
@@ -36,6 +37,7 @@ library
                       , text
                       , time
                       , bytestring
+                      , parsec
                       , stm
   default-language:    Haskell2010
 
@@ -67,8 +69,8 @@ test-suite auction-site-test
                      , vector
   other-modules:       SampleData
                      , AuctionStateSpecs
-                     , EnglishAuctionStateSpec
-                     , VickreyAuctionStateSpec
+                     , EnglishAuctionSpec
+                     , VickreyAuctionSpec
                      , BlindAuctionStateSpec
                      , ApiSerializationSpec
                      , ApiSpec

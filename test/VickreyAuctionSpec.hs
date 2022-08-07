@@ -1,10 +1,11 @@
-module VickreyAuctionStateSpec where
+module VickreyAuctionSpec where
 import AuctionSite.Domain.Auctions
 import SampleData
 import qualified AuctionSite.Domain.States as S
 import qualified AuctionSite.Domain.SingleSealedBid as SB
 import Test.Hspec
 import AuctionStateSpecs
+import Text.Read (readMaybe)
 
 spec:: ()->SpecWith ()
 spec ()=do
@@ -32,3 +33,17 @@ spec ()=do
       in maybeAmountAndWinner `shouldBe` Just (bidAmount1, buyer2)
 
     incrementSpec emptyVickreyAuctionState
+  describe "Vickrey auction type serialization" $ do
+    let sampleTypStr = "Vickrey"
+    it "can deserialize sample typ" $
+      let parsed = readMaybe sampleTypStr :: Maybe SB.Options
+      in parsed `shouldBe` Just SB.Vickrey
+    it "can serialize sample typ" $
+      show SB.Vickrey `shouldBe` sampleTypStr
+
+    let sampleTypBlindStr = "Blind"
+    it "can deserialize sample with values typ" $
+      let parsed = readMaybe sampleTypBlindStr :: Maybe SB.Options
+      in parsed `shouldBe` Just SB.Blind
+    it "can serialize sample with values typ" $
+      show SB.Blind `shouldBe` sampleTypBlindStr
