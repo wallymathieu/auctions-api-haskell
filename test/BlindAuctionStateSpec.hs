@@ -1,5 +1,5 @@
 module BlindAuctionStateSpec where
-import AuctionSite.Domain.Auctions
+import AuctionSite.Domain
 import SampleData
 import qualified AuctionSite.Domain.States as S
 import qualified AuctionSite.Domain.SingleSealedBid as SB
@@ -29,6 +29,6 @@ spec ()=do
 
     it "can get winner and price from an ended auction" $
       let maybeAmountAndWinner = S.tryGetAmountAndWinner stateEndedAfterTwoBids
-      in maybeAmountAndWinner `shouldBe` Just (bidAmount2, buyer2)
+      in maybeAmountAndWinner `shouldBe` Just (bidAmount2, userId buyer2)
 
     incrementSpec emptyBlindAuctionState

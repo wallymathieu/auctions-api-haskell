@@ -46,12 +46,13 @@ executable auction-site-exe
   hs-source-dirs:      app
   main-is:             Main.hs
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
-  build-depends:       base
-                     , Spock
-                     , http-types
-                     , auction-site
-                     , aeson
-                     , text
+  build-depends:        base
+                      , Spock
+                      , http-types
+                      , auction-site
+                      , aeson
+                      , time
+                      , text
   default-language:    Haskell2010
 
 test-suite auction-site-test
@@ -59,25 +60,25 @@ test-suite auction-site-test
   hs-source-dirs:      test
   main-is:             Spec.hs
   ghc-options:        -Wall -fwarn-tabs -Wno-missing-signatures
-  build-depends:       base
-                     , Spock
-                     , auction-site
-                     , aeson
-                     , time
-                     , hspec
-                     , hspec-wai
-                     , hspec-wai-json
-                     , wai-extra
-                     , vector
-                     , bytestring
-                     , http-types
-  other-modules:       SampleData
-                     , AuctionStateSpecs
-                     , EnglishAuctionSpec
-                     , VickreyAuctionSpec
-                     , BlindAuctionStateSpec
-                     , ApiSerializationSpec
-                     , ApiSpec
+  build-depends:        base
+                      , Spock
+                      , auction-site
+                      , aeson
+                      , time
+                      , hspec
+                      , hspec-wai
+                      , hspec-wai-json
+                      , wai-extra
+                      , vector
+                      , bytestring
+                      , http-types
+  other-modules:        SampleData
+                      , AuctionStateSpecs
+                      , EnglishAuctionSpec
+                      , VickreyAuctionSpec
+                      , BlindAuctionStateSpec
+                      , ApiSerializationSpec
+                      , ApiSpec
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N 
   default-language:    Haskell2010
 

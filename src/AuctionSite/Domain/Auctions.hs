@@ -34,7 +34,7 @@ data Auction = Auction { auctionId :: AuctionId,
   title :: String,
   -- | initial expiry
   expiry :: UTCTime,
-  seller :: UserId,
+  seller :: User,
   typ :: AuctionType,
   auctionCurrency :: Currency
 } deriving (Eq, Generic, Show)
@@ -42,7 +42,7 @@ data Auction = Auction { auctionId :: AuctionId,
 validateBid:: Bid->Auction->Either Errors ()
 validateBid bid auction
   | bidder bid == seller auction =
-    Left (SellerCannotPlaceBids (bidder bid, auctionId auction))
+    Left (SellerCannotPlaceBids (userId $ bidder bid, auctionId auction))
   | amountCurrency (bidAmount bid) /= auctionCurrency auction =
     Left (CurrencyConversion (auctionCurrency auction))
   | otherwise = Right ()
@@ -64,7 +64,7 @@ instance ToJSON Auction where
              "startsAt" .= startsAt', 
              "title" .= title',
              "expiry" .= expiry',
-             "seller" .= seller',
+             "user" .= seller',
              "type" .= typ',
              "currency" .= auctionCurrency' ]
 instance FromJSON Auction where
@@ -73,7 +73,7 @@ instance FromJSON Auction where
     startsAt' <- obj .: "startsAt"
     title' <- obj .: "title"
     expiry' <- obj .: "expiry"
-    seller' <- obj .: "seller"
+    seller' <- obj .: "user"
     typ' <- obj .: "type"
     currency' <- obj .: "currency"
     return (Auction { auctionId=auctionId', startsAt=startsAt', title=title', expiry=expiry', seller=seller', typ=typ', auctionCurrency=currency' })

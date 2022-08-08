@@ -21,4 +21,4 @@ instance FromJSON Command
 
 instance ToJSON CommandSuccess where
   toJSON (AuctionAdded time auction) = object ["$type".= String "AuctionAdded", "at" .= toJSON time, "auction" .= toJSON auction ]
-  toJSON (BidAccepted time auction) = object ["$type".= String "BidAccepted", "at" .= toJSON time, "auction" .= toJSON auction ]
+  toJSON (BidAccepted time bid) = object ["$type".= String "BidAccepted", "at" .= toJSON time, "bid" .= toJSON bid ]

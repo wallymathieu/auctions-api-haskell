@@ -12,6 +12,7 @@ import           Data.ByteString (ByteString)
 import qualified Data.ByteString.Lazy as LB
 import           Network.Wai.Test (SResponse)
 import           Network.HTTP.Types (methodGet, methodPost, Header, HeaderName)
+import           Data.Time (UTCTime(..))
 
 xJwtPayload :: HeaderName
 xJwtPayload = "x-jwt-payload"
@@ -20,11 +21,14 @@ getWithHeader :: ByteString -> [Header] -> WaiSession st SResponse
 getWithHeader path headers = request methodGet path headers ""
 postWithHeader :: ByteString  -> [Header] -> LB.ByteString -> WaiSession st SResponse
 postWithHeader = request methodPost
+getCurrentTime:: IO UTCTime
+getCurrentTime = pure $ read "2018-08-04 00:00:00.000000 UTC" --"2018-08-04T00:00:00.000Z"
 
 configuredApp = do
   state <- initAppState
   spockCfg <- defaultSpockCfg () PCNoDatabase state
-  spock spockCfg app
+
+  spock spockCfg (app getCurrentTime)
 
 spec :: Spec
 spec =
@@ -42,26 +46,26 @@ spec =
     auctionWithoutBidListJsonValue :: Value
     auctionWithoutBidListJsonValue = singletonArray auctionWithoutBidJsonValue
     auctionAddedJsonValue :: Value
-    auctionAddedJsonValue = object [ "$type" .= String "AuctionAdded", "at" .= String "2018-08-04T00:00:00.000Z",
+    auctionAddedJsonValue = object [ "$type" .= String "AuctionAdded", "at" .= String "2018-08-04T00:00:00Z",
                                      "auction" .= object [
                                         "id" .= Number 1,
-                                        "startsAt" .= String "2018-01-01T10:00:00.000Z",
+                                        "startsAt" .= String "2018-01-01T10:00:00Z",
                                         "title" .= String "First auction",
-                                        "expiry" .= String "2019-01-01T10:00:00.000Z",
+                                        "expiry" .= String "2019-01-01T10:00:00Z",
                                         "user" .= String "BuyerOrSeller|a1|Test",
                                         "type" .= String "English|VAC0|VAC0|0",
                                         "currency" .= String "VAC" ] ]
     bidAcceptedJsonValue :: Value
     bidAcceptedJsonValue = object [
         "$type" .= String "BidAccepted",
-        "at" .= String "2018-01-01T10:00:00.000Z",
+        "at" .= String "2018-08-04T00:00:00Z",
         "bid" .= object [
             "auction" .= Number 1,
             "user" .= String "BuyerOrSeller|a2|Buyer",
             "amount" .= String "VAC11",
-            "at" .= String "2018-01-01T10:00:00.000Z" ] ]
+            "at" .= String "2018-08-04T00:00:00Z" ] ]
     addAuctionOk = postWithHeader "/auction" [(xJwtPayload, seller1)] firstAuctionReqJson `shouldRespondWith` fromValue auctionAddedJsonValue
-    addBidOk = postWithHeader "/auction/1/bid" [(xJwtPayload, buyer1)] "{\"amount\":10}" `shouldRespondWith` fromValue bidAcceptedJsonValue
+    addBidOk = postWithHeader "/auction/1/bid" [(xJwtPayload, buyer1)] "{\"amount\":11}" `shouldRespondWith` fromValue bidAcceptedJsonValue
 
     addAuctionSpec = describe "add auction" $ do 
       it "possible to add auction" addAuctionOk

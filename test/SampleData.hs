@@ -16,10 +16,10 @@ sampleEndsAt :: UTCTime
 sampleEndsAt = read "2016-02-01 08:28:00.607875 UTC"::UTCTime
 sampleBidTime :: UTCTime
 sampleBidTime = read "2016-02-01 07:28:00.607875 UTC"::UTCTime
-sampleSeller :: UserId
-sampleSeller=  "Sample_Seller"::UserId 
-sampleBuyer :: UserId
-sampleBuyer = "Sample_Buyer"::UserId
+sampleSeller :: User
+sampleSeller=  BuyerOrSeller "Sample_Seller" "Seller"
+sampleBuyer :: User
+sampleBuyer = BuyerOrSeller "Sample_Buyer" "Buyer"
 
 sampleAuctionOfTyp:: AuctionType -> Auction
 sampleAuctionOfTyp typ' = Auction { auctionId = sampleAuctionId,
@@ -43,12 +43,12 @@ sampleBid = Bid {
   at = sampleBidTime,
   bidAmount = sek 100
 }
-buyer1::UserId
-buyer1 = "Buyer_1"::UserId
-buyer2::UserId
-buyer2 = "Buyer_2"::UserId
-buyer3::UserId
-buyer3 = "Buyer_3"::UserId
+buyer1::User
+buyer1 = BuyerOrSeller "Buyer_1" "Buyer 1"
+buyer2::User
+buyer2 = BuyerOrSeller "Buyer_2" "Buyer 2"
+buyer3::User
+buyer3 = BuyerOrSeller "Buyer_3" "Buyer 3"
 bidAmount1 :: Amount
 bidAmount1 = sek 10
 bid1 :: Bid

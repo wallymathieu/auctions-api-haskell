@@ -41,7 +41,7 @@ instance S.State State where
 
   addBid bid state = 
     let auctionId= forAuction bid
-        user= bidder bid
+        user= userId $ bidder bid
     in
     case state of
       AcceptingBids bids expiry opt-> 
@@ -64,11 +64,11 @@ instance S.State State where
     case state of
       AcceptingBids { } -> Nothing
       DisclosingBids  (highestBid : (secondHighest : _))  _ Vickrey  -> 
-        Just (bidAmount secondHighest, bidder highestBid)
+        Just (bidAmount secondHighest, userId $ bidder highestBid)
       DisclosingBids [highestBid] _ Vickrey -> 
-        Just (bidAmount highestBid, bidder highestBid)
+        Just (bidAmount highestBid, userId $ bidder highestBid)
       DisclosingBids (highestBid : _) _ Blind ->
-        Just (bidAmount highestBid, bidder highestBid)
+        Just (bidAmount highestBid, userId $ bidder highestBid)
       _ -> Nothing
 
   hasEnded state = 

@@ -10,6 +10,8 @@ module AuctionSite.Domain (
   Errors (..),
   UserId,
   AuctionId,
+  User (..),
+  userId,
   -- state
   State (..),
   Repository,

@@ -116,7 +116,7 @@ instance S.State State where
     case state of
     HasEnded (bid:_) _ opt ->
       if reservePrice opt < bidAmount bid then
-        Just (bidAmount bid, bidder bid)
+        Just (bidAmount bid, userId $ bidder bid)
       else
         Nothing
     _ -> Nothing

@@ -1,6 +1,6 @@
 module EnglishAuctionSpec where
 import AuctionSite.Domain.Core
-import AuctionSite.Domain.Auctions
+import AuctionSite.Domain
 import SampleData
 import AuctionSite.Money
 import qualified AuctionSite.Domain.States as S
@@ -41,7 +41,7 @@ spec ()=do
 
     it "can get winner and price from an auction" $
       let maybeAmountAndWinner = S.tryGetAmountAndWinner stateEndedAfterTwoBids
-      in maybeAmountAndWinner `shouldBe` Just (bidAmount2, buyer2)
+      in maybeAmountAndWinner `shouldBe` Just (bidAmount2, userId buyer2)
 
     let (_,maybeFail) = S.addBid bid_less_than_2 stateWith2Bids
     it "can't place bid lower than highest bid" $
