@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveGeneric  #-}
+{-# LANGUAGE DeriveGeneric,OverloadedStrings  #-}
 module AuctionSite.Domain.Auctions where
 
 import AuctionSite.Money
@@ -50,16 +50,30 @@ validateBid bid auction
 type AuctionState = Either SB.State TA.State
   
 emptyState :: Auction -> AuctionState
-emptyState a =
-  case typ a of
-  SingleSealedBid opt -> Left (SB.emptyState (expiry a) opt)
-  TimedAscending opt -> Right (TA.emptyState (startsAt a) (expiry a) opt)
-
+emptyState Auction{ typ=SingleSealedBid opt, expiry=expiry' } = Left (SB.emptyState expiry' opt)
+emptyState Auction{ typ=TimedAscending opt, expiry=expiry', startsAt=startsAt' } = Right (TA.emptyState startsAt' expiry' opt)
 
 instance ToJSON AuctionType where
   toJSON = toJsonOfShow
 instance FromJSON AuctionType where
   parseJSON = ofJsonOfRead "AuctionType"
 
-instance ToJSON Auction
-instance FromJSON Auction
+instance ToJSON Auction where
+  toJSON Auction { auctionId=auctionId', startsAt=startsAt', title=title', expiry=expiry', seller=seller', typ=typ', auctionCurrency=auctionCurrency' } = 
+    object [ "id".=auctionId', 
+             "startsAt" .= startsAt', 
+             "title" .= title',
+             "expiry" .= expiry',
+             "seller" .= seller',
+             "type" .= typ',
+             "currency" .= auctionCurrency' ]
+instance FromJSON Auction where
+  parseJSON = withObject "Auction" $ \obj -> do
+    auctionId' <- obj .: "id"
+    startsAt' <- obj .: "startsAt"
+    title' <- obj .: "title"
+    expiry' <- obj .: "expiry"
+    seller' <- obj .: "seller"
+    typ' <- obj .: "type"
+    currency' <- obj .: "currency"
+    return (Auction { auctionId=auctionId', startsAt=startsAt', title=title', expiry=expiry', seller=seller', typ=typ', auctionCurrency=currency' })

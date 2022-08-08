@@ -10,7 +10,6 @@ import qualified Data.Aeson as A
 import Text.Printf (printf)
 import qualified Data.Text as T
 import AuctionSite.Aeson
-import Data.Time.Clock.POSIX (utcTimeToPOSIXSeconds)
 import Data.Ratio (numerator)
 
 data Options = Options {

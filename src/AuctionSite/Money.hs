@@ -47,7 +47,6 @@ amountAdd (Amount ac av) (Amount bc bv) =
     error "Cant add two amounts with different currency"
 
 
- 
 instance ToJSON Currency where
   toJSON = toJsonOfShow
 instance FromJSON Currency where
