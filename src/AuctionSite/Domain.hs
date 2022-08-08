@@ -4,6 +4,7 @@ module AuctionSite.Domain (
   Auction (..),
   emptyState,
   validateBid,
+  AuctionState,
   -- bids
   Bid (..),
   -- core

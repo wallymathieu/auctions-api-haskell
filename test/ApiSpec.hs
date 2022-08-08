@@ -22,7 +22,7 @@ getWithHeader path headers = request methodGet path headers ""
 postWithHeader :: ByteString  -> [Header] -> LB.ByteString -> WaiSession st SResponse
 postWithHeader = request methodPost
 getCurrentTime:: IO UTCTime
-getCurrentTime = pure $ read "2018-08-04 00:00:00.000000 UTC" --"2018-08-04T00:00:00.000Z"
+getCurrentTime = pure $ read "2018-08-04 00:00:00.000000 UTC"
 
 configuredApp = do
   state <- initAppState
@@ -41,10 +41,10 @@ spec =
     firstAuctionReqJson = "{\"id\":1,\"startsAt\":\"2018-01-01T10:00:00.000Z\",\"endsAt\":\"2019-01-01T10:00:00.000Z\",\"title\":\"First auction\", \"currency\":\"VAC\" }"
     auctionJson = [ "currency" .= String "VAC", "expiry" .= String "2019-01-01T10:00:00Z", "id".= Number 1, "startsAt".= String "2018-01-01T10:00:00Z", "title".= String "First auction"]
     auctionWithBidJsonValue = object $ auctionJson ++ ["bids" .= array [ 
-      object  ["amount" .= String "VAC11", "bidder" .= String "BuyerOrSeller|a2|Buyer"] ], "winner".=String "","winnerPrice".=String ""  ] 
-    auctionWithoutBidJsonValue = object auctionJson
+      object  ["amount" .= String "VAC11", "bidder" .= String "BuyerOrSeller|a2|Buyer"] ], "winner".=Null,"winnerPrice".=Null ] 
+    auctionWithoutBidJsonValue = object $ auctionJson ++ ["bids" .= array [], "winner".=Null,"winnerPrice".=Null ] 
     auctionWithoutBidListJsonValue :: Value
-    auctionWithoutBidListJsonValue = singletonArray auctionWithoutBidJsonValue
+    auctionWithoutBidListJsonValue = singletonArray $ object auctionJson
     auctionAddedJsonValue :: Value
     auctionAddedJsonValue = object [ "$type" .= String "AuctionAdded", "at" .= String "2018-08-04T00:00:00Z",
                                      "auction" .= object [
@@ -69,7 +69,7 @@ spec =
 
     addAuctionSpec = describe "add auction" $ do 
       it "possible to add auction" addAuctionOk
-      it "not possible to same auction twice" $ do addAuctionOk; postWithHeader "/auction" [(xJwtPayload, seller1)] firstAuctionReqJson `shouldRespondWith` "Auction already exists" {matchStatus = 400}
+      it "not possible to same auction twice" $ do addAuctionOk; postWithHeader "/auction" [(xJwtPayload, seller1)] firstAuctionReqJson `shouldRespondWith` "\"AuctionAlreadyExists 1\"" {matchStatus = 400}
       it "returns added auction" $ do addAuctionOk; get "/auction/1" `shouldRespondWith` fromValue auctionWithoutBidJsonValue
       it "returns added auctions" $ do addAuctionOk; get "/auctions" `shouldRespondWith` fromValue auctionWithoutBidListJsonValue
     addBidSpec = describe "add bids to auction" $ do 
