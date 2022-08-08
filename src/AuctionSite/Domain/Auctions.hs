@@ -11,6 +11,7 @@ import Data.Time
 import Data.Aeson
 import Text.Read (readMaybe)
 import Control.Applicative ((<|>))
+import AuctionSite.Aeson (toJsonOfShow, ofJsonOfRead)
 
 data AuctionType=
   {- also known as an open ascending price auction
@@ -27,6 +28,7 @@ instance Read AuctionType where
     readMaybeTyp = ( TimedAscending <$> readMaybe v ) <|> ( SingleSealedBid <$> readMaybe v )
     interpret (Just auctionType) = [(auctionType,"")]
     interpret Nothing = []
+
 data Auction = Auction { auctionId :: AuctionId,
   startsAt :: UTCTime,
   title :: String,
@@ -54,8 +56,10 @@ emptyState a =
   TimedAscending opt -> Right (TA.emptyState (startsAt a) (expiry a) opt)
 
 
+instance ToJSON AuctionType where
+  toJSON = toJsonOfShow
+instance FromJSON AuctionType where
+  parseJSON = ofJsonOfRead "AuctionType"
 
-instance ToJSON AuctionType
-instance FromJSON AuctionType
 instance ToJSON Auction
 instance FromJSON Auction
