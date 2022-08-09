@@ -4,13 +4,15 @@ module AuctionSite.Money (
   Amount(..),
   amountCurrency,
   amountValue,
-  amountAdd
+  (+)
 ) where
-import GHC.Generics
-import Data.Aeson
-import Text.Printf (printf)
-import Text.Parsec
-import AuctionSite.Aeson
+import           GHC.Generics
+import           Data.Aeson
+import           Text.Printf (printf)
+import           Text.Parsec
+import           AuctionSite.Aeson
+import           Prelude hiding ((+))
+import qualified Prelude as P
 
 data Currency =
   VAC -- ^ virtual acution currency
@@ -23,7 +25,7 @@ data Amount = Amount Currency Integer
 instance Show Amount where
   show (Amount c i) = printf "%s%i" (show c) i
 instance Read Amount where
-  readsPrec _ v = interpret $ runParser parser () "readsPrec" v 
+  readsPrec _ v = interpret $ runParser parser () "Amount" v
     where
       interpret (Right val)= [(val,"")]
       interpret (Left _) = []
@@ -39,10 +41,10 @@ amountCurrency (Amount c _) = c
 amountValue :: Amount -> Integer
 amountValue (Amount _ v) = v
 
-amountAdd :: Amount -> Amount -> Amount
-amountAdd (Amount ac av) (Amount bc bv) =
+(+) :: Amount -> Amount -> Amount
+(+) (Amount ac av) (Amount bc bv) =
   if ac == bc then
-    Amount ac (av + bv)
+    Amount ac (av P.+ bv)
   else
     error "Cant add two amounts with different currency"
 
