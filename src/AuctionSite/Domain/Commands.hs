@@ -9,16 +9,27 @@ import Data.Aeson
 data Command =
   AddAuction UTCTime Auction
   | PlaceBid UTCTime Bid
-  deriving (Generic, Show)
+  deriving (Generic, Show, Eq)
 
 data CommandSuccess =
   AuctionAdded UTCTime Auction
   | BidAccepted UTCTime Bid
-  deriving (Generic, Show)
+  deriving (Generic, Show, Eq)
 
-instance ToJSON Command
-instance FromJSON Command
+
+instance ToJSON Command where
+  toJSON (AddAuction time auction) =  object ["$type" .= String "AddAuction", "at" .= time, "auction" .= auction]
+  toJSON (PlaceBid time bid) =  object ["$type" .= String "PlaceBid", "at" .= time, "bid" .= bid]
+
+instance FromJSON Command where
+  parseJSON (Object v) = do
+    typ <-v .: "$type"
+    case typ of
+      String "AddAuction" -> AddAuction <$> v .: "at" <*> v .: "auction"
+      String "PlaceBid"  -> PlaceBid <$> v .: "at" <*> v .: "bid"
+      t           -> fail "Unknown command type"
+  parseJSON _ = fail "Unexpected json command"
 
 instance ToJSON CommandSuccess where
-  toJSON (AuctionAdded time auction) = object ["$type".= String "AuctionAdded", "at" .= toJSON time, "auction" .= toJSON auction ]
-  toJSON (BidAccepted time bid) = object ["$type".= String "BidAccepted", "at" .= toJSON time, "bid" .= toJSON bid ]
+  toJSON (AuctionAdded time auction) =  object ["$type" .= String "AuctionAdded", "at" .= time, "auction" .= auction]
+  toJSON (BidAccepted time bid) =  object ["$type" .= String "BidAccepted", "at" .= time, "bid" .= bid]

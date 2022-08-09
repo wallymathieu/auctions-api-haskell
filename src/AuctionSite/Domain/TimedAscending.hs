@@ -4,13 +4,15 @@ import AuctionSite.Money
 import AuctionSite.Domain.Core
 import qualified AuctionSite.Domain.States as S
 import AuctionSite.Domain.Bids
-import GHC.Generics
-import Data.Time
+import Prelude hiding ((+))
 import qualified Data.Aeson as A
 import Text.Printf (printf)
 import qualified Data.Text as T
 import AuctionSite.Aeson
 import Data.Ratio (numerator)
+import Data.Time (NominalDiffTime, UTCTime, nominalDiffTimeToSeconds, addUTCTime, secondsToNominalDiffTime)
+import GHC.Generics (Generic)
+import Text.Read (readMaybe)
 
 data Options = Options {
   {- | the seller has set a minimum sale price in advance (the 'reserve' price) 
@@ -35,7 +37,15 @@ instance Read Options where
   readsPrec _ value = interpret $ T.splitOn "|" (T.pack value)
     where
       interpret :: [T.Text] -> [(Options,String)]
-      interpret ["English",reservePrice', minRaise', timeframe'] = [(Options {reservePrice= read $ T.unpack reservePrice',minRaise= read $ T.unpack minRaise', timeFrame = secondsToNominalDiffTime $ read $ T.unpack timeframe'},"")]
+      interpret ["English",a,b,c] =
+        let reservePrice' = readMaybe $ T.unpack a
+            minRaise'     = readMaybe $ T.unpack b
+            timeframe'    = readMaybe $ T.unpack c
+        in
+          case (reservePrice', minRaise', timeframe') of
+            (Just reservePrice'', Just minRaise'', Just timeframe'') ->
+              [(Options {reservePrice= reservePrice'', minRaise= minRaise'', timeFrame = secondsToNominalDiffTime timeframe''},"")]
+            _ -> []
       interpret _ = []
 
 defaultOptions:: Currency->Options
@@ -99,7 +109,7 @@ instance S.State State where
                   nextExpiry' = max nextExpiry (addUTCTime (timeFrame opt) now)
                   minRaiseAmount = minRaise opt
               in
-              if bAmount > amountAdd highestBidAmount minRaiseAmount then
+              if bAmount > highestBidAmount + minRaiseAmount then
                 -- OnGoing -> OnGoing B++
                 (OnGoing (bid:bids) nextExpiry' opt, Right())
               else
@@ -137,4 +147,3 @@ instance A.ToJSON Options where
 
 instance A.FromJSON Options where
   parseJSON = ofJsonOfRead "TimedAscendingOptions"
-

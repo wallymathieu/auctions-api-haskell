@@ -1,0 +1,7 @@
+[{"$type":"AddAuction","at":"2020-05-17T08:15:16.464Z","auction":{"id":1,"startsAt":"2018-12-01T10:00:00.000Z","title":"Some auction","expiry":"2020-05-18T10:00:00.000Z","user":"BuyerOrSeller|a1|Test","type":"English|VAC0|VAC0|0","currency":"VAC"}}]
+[{"$type":"AddAuction","at":"2020-05-17T08:15:19.904Z","auction":{"id":2,"startsAt":"2018-12-01T10:00:00.000Z","title":"Some auction","expiry":"2020-05-18T10:00:00.000Z","user":"BuyerOrSeller|a1|Test","type":"English|VAC0|VAC0|0","currency":"VAC"}}]
+[{"$type":"PlaceBid","at":"2020-05-17T08:15:22.948Z","bid":{"id":"32e692cc3fdb451da9647d6eeca5b2e3","auction":1,"user":"BuyerOrSeller|a2|Buyer","amount":"VAC11","at":"2020-05-17T08:15:22.940Z"}}]
+[{"$type":"PlaceBid","at":"2020-05-17T08:15:25.315Z","bid":{"id":"f1535dd77cb14d4e93a000641b2a719f","auction":2,"user":"BuyerOrSeller|a2|Buyer","amount":"VAC11","at":"2020-05-17T08:15:25.314Z"}}]
+[{"$type":"PlaceBid","at":"2020-05-17T08:15:27.631Z","bid":{"id":"be8d3fa88a0e41cab4da19b6aef06e67","auction":1,"user":"BuyerOrSeller|a1|Test","amount":"VAC11","at":"2020-05-17T08:15:27.631Z"}}]
+[{"$type":"PlaceBid","at":"2020-05-17T08:15:30.515Z","bid":{"id":"fcf2aafeb8844b2dae9acbd5989f9d88","auction":2,"user":"BuyerOrSeller|a1|Test","amount":"VAC11","at":"2020-05-17T08:15:30.515Z"}}]
+[{"$type":"AddAuction","at":"2020-05-17T08:26:19.029Z","auction":{"id":1,"startsAt":"2018-12-01T10:00:00.000Z","title":"Some auction","expiry":"2020-05-18T10:00:00.000Z","user":"BuyerOrSeller|a1|Test","type":"English|VAC0|VAC0|0","currency":"VAC"}}]
