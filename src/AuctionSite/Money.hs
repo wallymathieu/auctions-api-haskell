@@ -25,7 +25,7 @@ data Amount = Amount Currency Integer
 instance Show Amount where
   show (Amount c i) = printf "%s%i" (show c) i
 instance Read Amount where
-  readsPrec _ v = interpret $ runParser parser () "readsPrec" v 
+  readsPrec _ v = interpret $ runParser parser () "Amount" v
     where
       interpret (Right val)= [(val,"")]
       interpret (Left _) = []

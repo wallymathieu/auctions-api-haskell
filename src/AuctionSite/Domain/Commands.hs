@@ -23,11 +23,11 @@ instance ToJSON Command where
 
 instance FromJSON Command where
   parseJSON (Object v) = do
-    typ <-v .: "$type"
-    case typ of
+    typ' <-v .: "$type"
+    case typ' of
       String "AddAuction" -> AddAuction <$> v .: "at" <*> v .: "auction"
-      String "PlaceBid"  -> PlaceBid <$> v .: "at" <*> v .: "bid"
-      t           -> fail "Unknown command type"
+      String "PlaceBid"   -> PlaceBid <$> v .: "at" <*> v .: "bid"
+      _                   -> fail "Unknown command type"
   parseJSON _ = fail "Unexpected json command"
 
 instance ToJSON CommandSuccess where
