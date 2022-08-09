@@ -91,7 +91,7 @@ getAuctionAction tid = do
       let maybeAmountAndWinner = tryGetAmountAndWinner auctionState
           amount' = fst <$> maybeAmountAndWinner
           winner = snd <$> maybeAmountAndWinner
-      in json (object (["bids" .= getBids auctionState, "winner" .= winner, "winnerPrice" .= amount' ] ++ toAuctionListItemKV auction) )
+      in json (object (["bids" .= map toAuctionBidJson (getBids auctionState), "winner" .= winner, "winnerPrice" .= amount' ] ++ toAuctionListItemKV auction) )
 
 createAuctionAction :: IO UTCTime -> ApiAction a
 createAuctionAction getCurrentTime = do
@@ -119,6 +119,9 @@ toAuctionListItemKV :: KeyValue a => Auction -> [a]
 toAuctionListItemKV Auction { auctionId = aId, startsAt = startsAt', title = title', expiry = expiry', auctionCurrency = currency' } =
   [ "id" .= aId, "startsAt" .= startsAt', "title" .= title', "expiry" .= expiry', "currency" .= currency' ]
 
+toAuctionBidJson :: Bid -> Value 
+toAuctionBidJson Bid { bidAmount=amount', bidder=bidder' } =
+  object [ "amount" .= amount', "bidder" .= bidder' ]
 app :: IO UTCTime -> Api
 app getCurrentTime = do
   get "auctions" getAuctionsAction
