@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveGeneric     #-}
+{-# LANGUAGE DeriveGeneric, OverloadedStrings     #-}
 module AuctionSite.Domain.TimedAscending where
 import AuctionSite.Money
 import AuctionSite.Domain.Core
@@ -7,39 +7,55 @@ import AuctionSite.Domain.Bids
 import GHC.Generics
 import Data.Time
 import qualified Data.Aeson as A
+import Text.Printf (printf)
+import qualified Data.Text as T
+import AuctionSite.Aeson
+import Data.Ratio (numerator)
 
-data Options = Options { 
-  {- the seller has set a minimum sale price in advance (the 'reserve' price) 
+data Options = Options {
+  {- | the seller has set a minimum sale price in advance (the 'reserve' price) 
     and the final bid does not reach that price the item remains unsold
   If the reserve price is 0, that is the equivalent of not setting it. -}
   reservePrice:: Amount,
-  {- Sometimes the auctioneer sets a minimum amount by which the next bid must exceed the current highest bid.
+  {- | Sometimes the auctioneer sets a minimum amount by which the next bid must exceed the current highest bid.
      Having min raise equal to 0 is the equivalent of not setting it.-}
   minRaise:: Amount,
-  {- If no competing bidder challenges the standing bid within a given time frame, 
+  {- | If no competing bidder challenges the standing bid within a given time frame, 
      the standing bid becomes the winner, and the item is sold to the highest bidder 
      at a price equal to his or her bid. -}
   timeFrame:: NominalDiffTime
-} deriving (Eq, Generic, Show)
+
+} deriving (Eq, Generic)
+instance Show Options where
+  show Options { reservePrice=reservePrice', minRaise=minRaise', timeFrame=timeFrame' } =
+    let seconds = toRational ( nominalDiffTimeToSeconds timeFrame' )
+        s = numerator seconds
+    in printf "English|%s|%s|%i" (show reservePrice') (show minRaise') s
+instance Read Options where
+  readsPrec _ value = interpret $ T.splitOn "|" (T.pack value)
+    where
+      interpret :: [T.Text] -> [(Options,String)]
+      interpret ["English",reservePrice', minRaise', timeframe'] = [(Options {reservePrice= read $ T.unpack reservePrice',minRaise= read $ T.unpack minRaise', timeFrame = secondsToNominalDiffTime $ read $ T.unpack timeframe'},"")]
+      interpret _ = []
 
 defaultOptions:: Currency->Options
 defaultOptions c = Options { reservePrice =Amount c 0, minRaise =Amount c 0, timeFrame = 0::NominalDiffTime }
 
 data State =
-  AwaitingStart UTCTime UTCTime Options 
+  AwaitingStart UTCTime UTCTime Options
   | OnGoing  [Bid] UTCTime Options
   | HasEnded [Bid] UTCTime Options
   deriving(Eq, Generic, Show)
 
 emptyState :: UTCTime -> UTCTime -> Options -> State
-emptyState =AwaitingStart 
-  
+emptyState =AwaitingStart
+
 instance S.State State where
 
-  inc now state = 
-    case state of 
+  inc now state =
+    case state of
       AwaitingStart start startingExpiry opt ->
-        case (now > start, now < startingExpiry) of 
+        case (now > start, now < startingExpiry) of
           (True,True) -> -- AwaitingStart -> OnGoing 
             OnGoing [] startingExpiry opt
           (True, False) -> -- AwaitingStart -> HasEnded 
@@ -55,16 +71,16 @@ instance S.State State where
         -- HasEnded -> HasEnded
         state
 
-  addBid bid state = 
+  addBid bid state =
     let now = at bid
         auctionId = forAuction bid
         bAmount = bidAmount bid
     in
-    case state of 
+    case state of
         AwaitingStart start startingExpiry opt ->
-          case (now > start, now < startingExpiry) of 
-            (True,True) -> 
-              let nextExpiry = max startingExpiry (addUTCTime (timeFrame opt) now) 
+          case (now > start, now < startingExpiry) of
+            (True,True) ->
+              let nextExpiry = max startingExpiry (addUTCTime (timeFrame opt) now)
               in -- AwaitingStart -> OnGoing B++
               (OnGoing [bid] nextExpiry opt, Right ())
             (True, False) -> (HasEnded [] startingExpiry opt, Right ())
@@ -73,20 +89,20 @@ instance S.State State where
         OnGoing bids nextExpiry opt ->
           if now<nextExpiry then
             case bids of
-            [] -> 
+            [] ->
               let nextExpiry' = max nextExpiry (addUTCTime (timeFrame opt) now)
               in -- OnGoing -> OnGoing B++
               (OnGoing (bid:bids) nextExpiry' opt, Right())
-            highestBid:_ -> 
+            highestBid:_ ->
               -- you cannot bid lower than the "current bid"
               let highestBidAmount = bidAmount highestBid
                   nextExpiry' = max nextExpiry (addUTCTime (timeFrame opt) now)
-                  minRaiseAmount = minRaise opt 
+                  minRaiseAmount = minRaise opt
               in
               if bAmount > amountAdd highestBidAmount minRaiseAmount then
                 -- OnGoing -> OnGoing B++
                 (OnGoing (bid:bids) nextExpiry' opt, Right())
-              else 
+              else
                 -- OnGoing -> OnGoing !
                 (state, Left (MustPlaceBidOverHighestBid highestBidAmount))
           else
@@ -96,11 +112,11 @@ instance S.State State where
           -- HasEnded -> HasEnded !
           (state, Left (AuctionHasEnded auctionId))
 
-  tryGetAmountAndWinner state = 
+  tryGetAmountAndWinner state =
     case state of
-    HasEnded (bid:_) _ opt -> 
+    HasEnded (bid:_) _ opt ->
       if reservePrice opt < bidAmount bid then
-        Just (bidAmount bid, bidder bid)
+        Just (bidAmount bid, userId $ bidder bid)
       else
         Nothing
     _ -> Nothing
@@ -113,9 +129,12 @@ instance S.State State where
 
   hasEnded state=
     case state of
-    HasEnded {} -> True 
+    HasEnded {} -> True
     _ -> False
 
-instance A.ToJSON Options
-instance A.FromJSON Options
+instance A.ToJSON Options where
+  toJSON = toJsonOfShow
+
+instance A.FromJSON Options where
+  parseJSON = ofJsonOfRead "TimedAscendingOptions"
 

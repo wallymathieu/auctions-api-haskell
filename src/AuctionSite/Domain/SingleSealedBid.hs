@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveGeneric     #-}
+{-# LANGUAGE DeriveGeneric, OverloadedStrings     #-}
 module AuctionSite.Domain.SingleSealedBid where
 import AuctionSite.Domain.Core
 import qualified AuctionSite.Domain.States as S
@@ -11,15 +11,15 @@ import qualified Data.Aeson as A
 import Data.Ord
 
 data Options =
-  {- Sealed first-price auction 
+  {- | Sealed first-price auction 
     In this type of auction all bidders simultaneously submit sealed bids so that no bidder knows the bid of any
     other participant. The highest bidder pays the price they submitted.
     This type of auction is distinct from the English auction, in that bidders can only submit one bid each.-}
   Blind
-  {- Also known as a sealed-bid second-price auction.
+  {- | Also known as a sealed-bid second-price auction.
     This is identical to the sealed first-price auction except that the winning bidder pays the second-highest bid
     rather than his or her own -}
-  |Vickrey deriving (Eq, Generic, Show)
+  |Vickrey deriving (Eq, Generic, Show, Read)
 
 data State =
   AcceptingBids (Map.Map UserId Bid) UTCTime Options
@@ -41,7 +41,7 @@ instance S.State State where
 
   addBid bid state = 
     let auctionId= forAuction bid
-        user= bidder bid
+        user= userId $ bidder bid
     in
     case state of
       AcceptingBids bids expiry opt-> 
@@ -64,11 +64,11 @@ instance S.State State where
     case state of
       AcceptingBids { } -> Nothing
       DisclosingBids  (highestBid : (secondHighest : _))  _ Vickrey  -> 
-        Just (bidAmount secondHighest, bidder highestBid)
+        Just (bidAmount secondHighest, userId $ bidder highestBid)
       DisclosingBids [highestBid] _ Vickrey -> 
-        Just (bidAmount highestBid, bidder highestBid)
+        Just (bidAmount highestBid, userId $ bidder highestBid)
       DisclosingBids (highestBid : _) _ Blind ->
-        Just (bidAmount highestBid, bidder highestBid)
+        Just (bidAmount highestBid, userId $ bidder highestBid)
       _ -> Nothing
 
   hasEnded state = 
@@ -78,5 +78,6 @@ instance S.State State where
   
 
 instance A.ToJSON Options
+ 
 instance A.FromJSON Options
 

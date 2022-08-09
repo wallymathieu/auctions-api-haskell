@@ -1,5 +1,5 @@
-import qualified EnglishAuctionStateSpec as English
-import qualified VickreyAuctionStateSpec as Vickrey
+import qualified EnglishAuctionSpec as English
+import qualified VickreyAuctionSpec as Vickrey
 import qualified BlindAuctionStateSpec as Blind
 import qualified ApiSerializationSpec
 import qualified ApiSpec

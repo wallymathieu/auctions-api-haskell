@@ -4,12 +4,15 @@ module AuctionSite.Domain (
   Auction (..),
   emptyState,
   validateBid,
+  AuctionState,
   -- bids
   Bid (..),
   -- core
   Errors (..),
   UserId,
   AuctionId,
+  User (..),
+  userId,
   -- state
   State (..),
   Repository,
