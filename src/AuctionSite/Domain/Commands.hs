@@ -9,12 +9,12 @@ import Data.Aeson
 data Command =
   AddAuction UTCTime Auction
   | PlaceBid UTCTime Bid
-  deriving (Generic, Show)
+  deriving (Generic, Show, Eq)
 
 data CommandSuccess =
   AuctionAdded UTCTime Auction
   | BidAccepted UTCTime Bid
-  deriving (Generic, Show)
+  deriving (Generic, Show, Eq)
 
 instance ToJSON Command
 instance FromJSON Command
