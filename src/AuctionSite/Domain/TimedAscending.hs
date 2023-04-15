@@ -15,15 +15,15 @@ import GHC.Generics (Generic)
 import Text.Read (readMaybe)
 
 data Options = Options {
-  {- | the seller has set a minimum sale price in advance (the 'reserve' price) 
+  {- | the seller has set a minimum sale price in advance (the 'reserve' price)
     and the final bid does not reach that price the item remains unsold
   If the reserve price is 0, that is the equivalent of not setting it. -}
   reservePrice:: Amount,
   {- | Sometimes the auctioneer sets a minimum amount by which the next bid must exceed the current highest bid.
      Having min raise equal to 0 is the equivalent of not setting it.-}
   minRaise:: Amount,
-  {- | If no competing bidder challenges the standing bid within a given time frame, 
-     the standing bid becomes the winner, and the item is sold to the highest bidder 
+  {- | If no competing bidder challenges the standing bid within a given time frame,
+     the standing bid becomes the winner, and the item is sold to the highest bidder
      at a price equal to his or her bid. -}
   timeFrame:: NominalDiffTime
 
@@ -66,9 +66,9 @@ instance S.State State where
     case state of
       AwaitingStart start startingExpiry opt ->
         case (now > start, now < startingExpiry) of
-          (True,True) -> -- AwaitingStart -> OnGoing 
+          (True,True) -> -- AwaitingStart -> OnGoing
             OnGoing [] startingExpiry opt
-          (True, False) -> -- AwaitingStart -> HasEnded 
+          (True, False) -> -- AwaitingStart -> HasEnded
             HasEnded [] startingExpiry opt
           _ -> -- AwaitingStart -> AwaitingStart
             state
@@ -85,42 +85,32 @@ instance S.State State where
     let now = at bid
         auctionId = forAuction bid
         bAmount = bidAmount bid
+        next = S.inc now state
     in
-    case state of
-        AwaitingStart start startingExpiry opt ->
-          case (now > start, now < startingExpiry) of
-            (True,True) ->
-              let nextExpiry = max startingExpiry (addUTCTime (timeFrame opt) now)
-              in -- AwaitingStart -> OnGoing B++
-              (OnGoing [bid] nextExpiry opt, Right ())
-            (True, False) -> (HasEnded [] startingExpiry opt, Right ())
-            _ -> -- AwaitingStart -> AwaitingStart !
-              (state,Left (AuctionHasNotStarted auctionId))
-        OnGoing bids nextExpiry opt ->
-          if now<nextExpiry then
-            case bids of
-            [] ->
-              let nextExpiry' = max nextExpiry (addUTCTime (timeFrame opt) now)
-              in -- OnGoing -> OnGoing B++
-              (OnGoing (bid:bids) nextExpiry' opt, Right())
-            highestBid:_ ->
-              -- you cannot bid lower than the "current bid"
-              let highestBidAmount = bidAmount highestBid
-                  nextExpiry' = max nextExpiry (addUTCTime (timeFrame opt) now)
-                  minRaiseAmount = minRaise opt
-              in
-              if bAmount > highestBidAmount + minRaiseAmount then
-                -- OnGoing -> OnGoing B++
-                (OnGoing (bid:bids) nextExpiry' opt, Right())
-              else
-                -- OnGoing -> OnGoing !
-                (state, Left (MustPlaceBidOverHighestBid highestBidAmount))
+    case next of
+      AwaitingStart {} ->
+        (next,Left (AuctionHasNotStarted auctionId))
+      OnGoing bids nextExpiry opt ->
+        case bids of
+        [] ->
+          let nextExpiry' = max nextExpiry (addUTCTime (timeFrame opt) now)
+          in -- OnGoing -> OnGoing B++
+          (OnGoing (bid:bids) nextExpiry' opt, Right ())
+        highestBid:_ ->
+          -- you cannot bid lower than the "current bid"
+          let highestBidAmount = bidAmount highestBid
+              nextExpiry' = max nextExpiry (addUTCTime (timeFrame opt) now)
+              minRaiseAmount = minRaise opt
+          in
+          if bAmount > highestBidAmount + minRaiseAmount then
+            -- OnGoing -> OnGoing B++
+            (OnGoing (bid:bids) nextExpiry' opt, Right ())
           else
-            -- OnGoing -> HasEnded !
-            (HasEnded bids nextExpiry opt, Left (AuctionHasEnded auctionId))
-        HasEnded { } ->
-          -- HasEnded -> HasEnded !
-          (state, Left (AuctionHasEnded auctionId))
+            -- OnGoing -> OnGoing !
+            (next, Left (MustPlaceBidOverHighestBid highestBidAmount))
+      HasEnded { } ->
+        -- HasEnded -> HasEnded !
+        (next, Left (AuctionHasEnded auctionId))
 
   tryGetAmountAndWinner state =
     case state of
