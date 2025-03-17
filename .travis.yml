@@ -1,0 +1,24 @@
+sudo: false
+language: c
+
+addons:
+  apt:
+    packages:
+    - libgmp-dev
+
+before_install:
+# stack
+- mkdir -p ~/.local/bin
+- export PATH=$HOME/.local/bin:$PATH
+- travis_retry curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
+- stack --no-terminal setup
+
+script:
+- mkdir -p to-travis
+- stack --no-terminal build --copy-bins --local-bin-path to-travis
+- stack --no-terminal test
+# - curl -sL https://raw.github.com/ndmitchell/hlint/master/misc/travis.sh | sh -s .
+
+cache:
+  directories:
+  - $HOME/.stack
