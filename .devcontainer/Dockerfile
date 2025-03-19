@@ -77,9 +77,6 @@ RUN ((stack ghc -- --version 2>/dev/null) || true) && \
 # Set global custom defaults for stack.
 RUN printf "ghc-options:\n  \"\$everything\": -haddock\n" >> /home/${USERNAME}/.stack/config.yaml
 
-# Install hls
-RUN ghcup install hls ${HLS_VERSION} --set
-
 ENV DEBIAN_FRONTEND=dialog
 
 ENTRYPOINT ["/bin/bash"]
