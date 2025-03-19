@@ -18,6 +18,7 @@
     "customizations": {
       "vscode": {
         "extensions": [
+            "haskell.haskell"
         ],
         "settings": {
           "files.exclude": {
