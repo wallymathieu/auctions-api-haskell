@@ -5,7 +5,7 @@
     "build": {
       "args": {
         "USERNAME": "vscode",
-        "GHC_VERSION": "9.4.8",
+        "GHC_VERSION": "9.12.2",
         "STACK_VERSION": "recommended",
         "STACK_RESOLVER": "nightly",
         "CABAL_VERSION": "recommended",

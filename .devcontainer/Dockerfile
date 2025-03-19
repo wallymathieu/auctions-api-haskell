@@ -1,8 +1,8 @@
-FROM debian:bookworm-slim AS base
+FROM ubuntu:24.04 AS base
 # see  https://github.com/vzarytovskii/haskell-dev-env
 ENV LANG=C.UTF-8
 # run `ghcup list` to see available versions:
-ARG GHC_VERSION=9.4.8
+ARG GHC_VERSION=9.12.2
 ARG STACK_VERSION=recommended
 ARG STACK_RESOLVER=nightly
 ARG CABAL_VERSION=recommended
@@ -10,8 +10,8 @@ ARG HLS_VERSION=recommended
 ARG LLVM_VERSION=17
 
 ENV USERNAME=vscode \
-    USER_UID=1000 \
-    USER_GID=1000 \
+    USER_UID=1100 \
+    USER_GID=1100 \
     DEBIAN_FRONTEND=noninteractive \
     GHC_VERSION=${GHC_VERSION} \
     STACK_VERSION=${STACK_VERSION} \
@@ -31,7 +31,7 @@ RUN VERSION_CODENAME=$(grep VERSION_CODENAME /etc/os-release | cut -d'=' -f2) &&
     add-apt-repository -y -s -n "deb http://apt.llvm.org/${VERSION_CODENAME}/ llvm-toolchain-${VERSION_CODENAME}-${LLVM_VERSION} main" && \
     wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc && \
     apt-get update && \
-    apt-get install -y --no-install-recommends apt-utils bash build-essential ca-certificates curl gcc git gnupg libffi-dev libffi8 libgmp-dev libgmp-dev libgmp10 libicu-dev libncurses-dev libncurses5 libnuma1 libnuma-dev libtinfo5 lsb-release make procps sudo xz-utils z3 zlib1g-dev clang-$LLVM_VERSION lldb-$LLVM_VERSION lld-$LLVM_VERSION clangd-$LLVM_VERSION
+    apt-get install -y --no-install-recommends apt-utils bash build-essential ca-certificates curl gcc git gnupg libffi-dev libffi8 libgmp-dev libgmp-dev libgmp10 libicu-dev libncurses-dev libnuma1 libnuma-dev lsb-release make procps sudo xz-utils z3 zlib1g-dev clang-$LLVM_VERSION lldb-$LLVM_VERSION lld-$LLVM_VERSION clangd-$LLVM_VERSION
 
 RUN groupadd --gid ${USER_GID} ${USERNAME} && \
     useradd -ms /bin/bash -K MAIL_DIR=/dev/null --uid ${USER_UID} --gid ${USER_GID} -m ${USERNAME} && \
