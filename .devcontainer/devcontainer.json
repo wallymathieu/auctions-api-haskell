@@ -1,0 +1,34 @@
+{
+    "name": "DevContainer for Haskell",
+    "remoteUser": "vscode",
+    "runArgs": [],
+    "build": {
+      "args": {
+        "USERNAME": "vscode",
+        "GHC_VERSION": "9.4.8",
+        "STACK_VERSION": "recommended",
+        "STACK_RESOLVER": "nightly",
+        "CABAL_VERSION": "recommended",
+        "HLS_VERSION": "recommended",
+        "LLVM_VERSION": "17"
+      },
+      "context": "..",
+      "dockerfile": "Dockerfile"
+    },
+    "customizations": {
+      "vscode": {
+        "extensions": [
+        ],
+        "settings": {
+          "files.exclude": {
+            "**/*.olean": true,
+            "**/.DS_Store": true,
+            "**/.git": true,
+            "**/.hg": true,
+            "**/.svn": true,
+            "**/CVS": true
+          }
+        }
+      }
+    }
+  }
