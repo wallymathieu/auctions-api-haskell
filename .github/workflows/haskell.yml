@@ -12,13 +12,14 @@ permissions:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
     - uses: actions/checkout@v3
     - uses: actions/setup-haskell@v1
       with:
-        ghc-version: '9.4.7'
+        # see https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2404-Readme.md
+        ghc-version: '9.12.2'
         cabal-version: '3.2'
 
     - name: Cache
