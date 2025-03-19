@@ -3,7 +3,7 @@ module AuctionSite.Web.App where
 
 import           Web.Spock
 
-import           Data.Aeson                hiding (json)
+import           Data.Aeson
 import           Data.Aeson.Types          (parseMaybe)
 import           GHC.Conc                  (newTVar, readTVarIO, atomically)
 import           Prelude
@@ -115,7 +115,7 @@ getAuctionsAction = do
   auctions' <- readAuctions
   json (map (object . toAuctionListItemKV) auctions')
 
-toAuctionListItemKV :: KeyValue a => Auction -> [a]
+toAuctionListItemKV :: KeyValue e a => Auction -> [a]
 toAuctionListItemKV Auction { auctionId = aId, startsAt = startsAt', title = title', expiry = expiry', auctionCurrency = currency' } =
   [ "id" .= aId, "startsAt" .= startsAt', "title" .= title', "expiry" .= expiry', "currency" .= currency' ]
 

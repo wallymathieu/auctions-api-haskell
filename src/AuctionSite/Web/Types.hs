@@ -1,6 +1,6 @@
 {-# LANGUAGE DeriveGeneric, OverloadedStrings #-}
 module AuctionSite.Web.Types where
-import           Data.Aeson       hiding (json)
+import           Data.Aeson
 import           GHC.Generics
 import           GHC.Conc         (TVar)
 import           Prelude

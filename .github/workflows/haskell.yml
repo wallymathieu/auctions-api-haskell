@@ -2,9 +2,9 @@ name: Haskell CI
 
 on:
   push:
-    branches: [ "spock" ]
+    branches: [ "master", "spock" ]
   pull_request:
-    branches: [ "spock" ]
+    branches: [ "master", "spock" ]
 
 permissions:
   contents: read
@@ -12,14 +12,15 @@ permissions:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
     - uses: actions/checkout@v3
-    - uses: actions/setup-haskell@v1
+    - uses: haskell-actions/setup@v2.7.10
       with:
-        ghc-version: '8.10.3'
-        cabal-version: '3.2'
+        # see https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2404-Readme.md
+        ghc-version: '9.4.7'
+        # cabal-version: '3.6'
 
     - name: Cache
       uses: actions/cache@v3
