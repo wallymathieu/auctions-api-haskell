@@ -2,9 +2,9 @@ name: Haskell CI
 
 on:
   push:
-    branches: [ "master", "spock" ]
+    branches: [ "master", "spock", "servant" ]
   pull_request:
-    branches: [ "master", "spock" ]
+    branches: [ "master", "spock", "servant" ]
 
 permissions:
   contents: read
