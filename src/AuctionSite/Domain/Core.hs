@@ -11,8 +11,7 @@ import qualified Data.Aeson.Types as ATyp
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Lazy as LB
 import qualified Data.ByteString.Base64 as B64
-import Servant (FromHttpApiData,parseHeader,parseUrlPiece)
-
+import Servant (FromHttpApiData, parseHeader)
 
 type UserId = T.Text
 data User =
@@ -41,8 +40,19 @@ instance FromHttpApiData User where
     Just u -> Right u
     Nothing -> Left "unknown"
 
-tryReadJsonUser :: Value -> Maybe User
-tryReadJsonUser = ATyp.parseMaybe $ withObject "User" $ \o -> do
+parseUserFromJWT :: BS.ByteString -> Maybe User
+parseUserFromJWT token = do
+  readAndDecodeBase64 token
+  where
+    readAndDecodeBase64 :: BS.ByteString -> Maybe User
+    readAndDecodeBase64 v = decodeBase64 v >>= decode >>= tryReadJWTUser
+    decodeBase64 :: BS.ByteString -> Maybe LB.ByteString
+    decodeBase64 v =  case B64.decode v of
+                      Right b -> pure (LB.fromStrict b)
+                      Left _ -> Nothing
+
+tryReadJWTUser :: Value -> Maybe User
+tryReadJWTUser = ATyp.parseMaybe $ withObject "User" $ \o -> do
   sub' <- o .: "sub"
   name' <- o .:? "name"
   uTyp' <- o .: "u_typ"
@@ -52,18 +62,6 @@ tryReadJsonUser = ATyp.parseMaybe $ withObject "User" $ \o -> do
     createUser sub (Just name) "0" = pure $ BuyerOrSeller sub name
     createUser sub _           "1" = pure $ Support sub
     createUser _   _           _   = ATyp.prependFailure "parsing User failed, " (fail "could not interpret values")
-
--- Authentication function
-parseUserFromJWT :: BS.ByteString -> Maybe User
-parseUserFromJWT token = do
-  readAndDecodeBase64 token
-  where
-    readAndDecodeBase64 :: BS.ByteString -> Maybe User
-    readAndDecodeBase64 v = decodeBase64 v >>= decode >>= tryReadJsonUser
-    decodeBase64 :: BS.ByteString -> Maybe LB.ByteString
-    decodeBase64 v =  case B64.decode v of
-                      Right b -> pure (LB.fromStrict b)
-                      Left _ -> Nothing
 
 type AuctionId = Integer
 

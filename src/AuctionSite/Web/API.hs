@@ -12,12 +12,9 @@ module AuctionSite.Web.API where
 import Control.Concurrent.STM
 import Control.Monad.Reader
 import Data.Aeson
-import Data.Aeson.Types (parseMaybe, Parser, prependFailure)
 import Data.Proxy
 import Data.Time.Clock (UTCTime)
 import qualified Data.Text as T
-import qualified Data.ByteString as BS
-import qualified Data.ByteString.Base64 as B64
 import qualified Data.ByteString.Lazy as LB
 import qualified Data.Map as Map
 import GHC.Generics

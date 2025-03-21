@@ -2,7 +2,6 @@
 module AuctionSite.Web.Types where
 import           Data.Aeson
 import           GHC.Generics
-import           GHC.Conc         (TVar)
 import           Prelude
 import           Data.Time        (UTCTime)
 import           Control.Applicative
