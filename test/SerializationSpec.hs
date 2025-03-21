@@ -1,21 +1,17 @@
 {-# LANGUAGE OverloadedStrings #-}
 module SerializationSpec where
-import Domain.Prelude
-import Domain.Bids
-import Domain.Auctions
-import Domain.SingleSealedBid
+import AuctionSite.Domain
+import qualified AuctionSite.Domain.Commands as C
+import qualified AuctionSite.Domain.TimedAscending as TA
+import AuctionSite.Persistence.JsonFile
+import AuctionSite.Money
 
-import Money
 import Data.Time
-import Persistence.JsonFile
 import Test.Hspec
 import Data.Aeson
-import Parser
 import qualified SampleData as S
-import qualified Domain.Commands as C
 import qualified Data.ByteString.Lazy.Char8 as BS
-import qualified Domain.TimedAscending as TA
-import qualified Data.Text as T
+import Text.Read (readMaybe)
 
 addAuction = C.AddAuction S.sampleStartsAt S.sampleAuction
 bid = C.PlaceBid S.sampleBidTime S.bid1
@@ -48,34 +44,34 @@ spec () = do
 
   describe "parse" $ do
     it "can parse amount" $
-      let decoded = parse "VAC0" :: Maybe Amount
+      let decoded = readMaybe "VAC0" :: Maybe Amount
       in
         decoded `shouldBe` Just vac0
     it "can parse and write amount" $
-      let decoded = parse $ T.pack $ show vac0 :: Maybe Amount
+      let decoded = readMaybe $ show vac0 :: Maybe Amount
       in
         decoded `shouldBe` Just vac0
     it "can write auctiontype" $
-      let decoded = parse $ T.pack $ show timedAscending :: Maybe AuctionType
+      let decoded = readMaybe $ show timedAscending :: Maybe AuctionType
       in
         decoded `shouldBe` Just timedAscending
     it "can read auctiontype" $
       let
         text = "English|VAC0|VAC0|0"
-        decoded = parse $ T.pack $ text
+        decoded = readMaybe text
       in
         decoded `shouldBe` Just timedAscending
 
   describe "write json" $ do
     it "can serialize add auction" $
       let
-        encoded = BS.unpack $ encode addAuction
-        expected = "{\"$type\":\"AddAuction\",\"at\":\"2016-01-01T08:28:00.607875Z\",\"auction\":{\"expiry\":\"2016-02-01T08:28:00.607875Z\",\"startsAt\":\"2016-01-01T08:28:00.607875Z\",\"user\":\"Sample_Seller\",\"currency\":\"SEK\",\"id\":1,\"title\":\"auction\",\"type\":\"Vickrey\"}}"
+        encoded = toJSON addAuction
+        expected = decode "{\"$type\":\"AddAuction\",\"at\":\"2016-01-01T08:28:00.607875Z\",\"auction\":{\"expiry\":\"2016-02-01T08:28:00.607875Z\",\"startsAt\":\"2016-01-01T08:28:00.607875Z\",\"user\":\"BuyerOrSeller|Sample_Seller|Seller\",\"currency\":\"SEK\",\"id\":1,\"title\":\"auction\",\"type\":\"Vickrey\"}}"
       in
-        encoded `shouldBe` expected
+        Just encoded `shouldBe` expected
     it "can serialize place bid" $
       let
-        encoded = BS.unpack $ encode bid
-        json = "{\"$type\":\"PlaceBid\",\"bid\":{\"amount\":\"SEK10\",\"at\":\"2016-01-01T08:28:00.607875000001Z\",\"auction\":1,\"user\":\"Buyer_1\",\"id\":\"baseless-leaf-olds-fade-sledsdebases\"},\"at\":\"2016-02-01T07:28:00.607875Z\"}"
+        encoded = toJSON bid
+        json = decode "{\"$type\":\"PlaceBid\",\"at\":\"2016-02-01T07:28:00.607875Z\",\"bid\":{\"amount\":\"SEK10\",\"at\":\"2016-01-01T08:28:00.607875000001Z\",\"auction\":1,\"user\":\"BuyerOrSeller|Buyer_1|Buyer 1\"}}"
       in
-        encoded `shouldBe` json
+        Just encoded `shouldBe` json

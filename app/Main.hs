@@ -1,20 +1,14 @@
-{-# LANGUAGE RecordWildCards #-}
+-- app/Main.hs
+{-# LANGUAGE OverloadedStrings #-}
 module Main where
-  
-import           Data.Aeson       hiding (json)
-import           Data.Monoid      ((<>))
-import           Data.Text        (pack)
-import           GHC.Generics
-import qualified Prelude as P
 
--- import qualified Money as M
-import qualified Domain.Prelude as DP
-import qualified Domain.Auctions as A
-import qualified Domain.Commands as C
+import qualified Data.Time as Time
+import Network.Wai.Handler.Warp (run)
 
+import AuctionSite.Web.API (app)
 
--- Run a Auction server on localhost:8080
 main :: IO ()
 main = do
-  let server = AuctionBackend{..}
-  runAuctionServer (ServerConfig "localhost" 8080) server
+  putStrLn "Starting auction site server on port 8080..."
+  application <- app Time.getCurrentTime
+  run 8080 application

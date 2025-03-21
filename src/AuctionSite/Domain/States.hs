@@ -1,9 +1,9 @@
-module Domain.States (module Domain.States) where
-import Domain.Prelude
-import Domain.Bids
+module AuctionSite.Domain.States where
+import AuctionSite.Domain.Core
+import AuctionSite.Domain.Bids
 import Data.Time
 import Data.Bifunctor
-import Money
+import AuctionSite.Money
 
 class State a where
   inc :: UTCTime -> a -> a
@@ -14,7 +14,7 @@ class State a where
 
 -- composing two State types as a State by using Either
 instance (State a , State b) => (State (Either a b)) where
-  inc now = bimap (inc now) (inc now) 
+  inc now = bimap (inc now) (inc now)
 
   addBid bid state =
     {- 
@@ -23,16 +23,16 @@ instance (State a , State b) => (State (Either a b)) where
     -}
     let splitFstJoinSnd c = case c of
                             (Left (a,b)) -> (Left a, b)
-                            (Right (a,b)) -> (Right a, b) in
+                            (Right (a,b)) -> (Right a, b)
     
-    let res = bimap (addBid bid) (addBid bid) state in 
+        res = bimap (addBid bid) (addBid bid) state in 
     splitFstJoinSnd res
   getBids state=
-    let res = bimap getBids getBids state in
-      either id id res
+    let res = bimap getBids getBids state 
+    in either id id res
   tryGetAmountAndWinner state=
-    let res = bimap tryGetAmountAndWinner tryGetAmountAndWinner state in
-      either id id res
+    let res = bimap tryGetAmountAndWinner tryGetAmountAndWinner state
+    in either id id res
   hasEnded state=
-    let res = bimap hasEnded hasEnded state in
-      either id id res
+    let res = bimap hasEnded hasEnded state
+    in either id id res

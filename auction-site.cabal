@@ -15,72 +15,81 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:    Money
-                      , Parser
-                      , Domain
-                      , Domain.Auctions
-                      , Domain.Bids
-                      , Domain.Prelude
-                      , Domain.SingleSealedBid, Domain.TimedAscending, Domain.States
-                      , Domain.Commands
-                      , Persistence.JsonFile
-                      , Persistence.Redis
+  exposed-modules:      AuctionSite.Money
+                      , AuctionSite.Aeson
+                      , AuctionSite.Domain
+                      , AuctionSite.Domain.Auctions
+                      , AuctionSite.Domain.Bids
+                      , AuctionSite.Domain.Core
+                      , AuctionSite.Domain.SingleSealedBid, AuctionSite.Domain.TimedAscending, AuctionSite.Domain.States
+                      , AuctionSite.Domain.Commands
+                      , AuctionSite.Persistence.JsonFile
+                      , AuctionSite.Web.Types
+                      , AuctionSite.Web.API
+  ghc-options:        -Wall -fwarn-tabs
   other-modules:
-  build-depends:       base >= 4.9 && < 5
-                      , containers >= 0.6 && <0.7
+  build-depends:       base
+                      , containers
                       , aeson
+                      , http-types
                       , text
                       , time
                       , bytestring
-                      , hedis
-                      , regex-base
-                      , regex-pcre
-                      , array
+                      , parsec
+                      , base64-bytestring
+                      , stm
+                      , servant
+                      , servant-server
+                      , servant-auth-server
+                      , wai
+                      , warp
+                      , http-types
+                      , mtl
+                      , cookie
   default-language:    Haskell2010
 
 executable auction-site-exe
   hs-source-dirs:      app
   main-is:             Main.hs
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
-  build-depends:       base
-                     , auction-site
-                     , aeson
-                     , text
-                     , containers
-                     , network-uri
-                     , servant
-                     , http-api-data
-                     , servant-server
-                     , servant
-                     , warp
-                     , transformers
-                     , mtl
-                     , http-client
-                     , http-types
-                     , wai
+  build-depends:        base
+                      , auction-site
+                      , containers
+                      , aeson
+                      , time
+                      , text
+                      , warp
+                      , stm
   default-language:    Haskell2010
 
 test-suite auction-site-test
   type:                exitcode-stdio-1.0
   hs-source-dirs:      test
   main-is:             Spec.hs
-  build-depends:       base
-                     , scotty
-                     , auction-site
-                     , hspec
-                     , time
-                     , hspec
-                     , directory
-                     , aeson
-                     , bytestring
-                     , text
-  other-modules:       SampleData
-                     , AuctionStateSpecs
-                     , EnglishAuctionStateSpec
-                     , VickreyAuctionStateSpec
-                     , BlindAuctionStateSpec
-                     , SerializationSpec
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N 
+  ghc-options:        -Wall -fwarn-tabs -Wno-missing-signatures -threaded -rtsopts -with-rtsopts=-N
+  build-depends:        base
+                      , auction-site
+                      , aeson
+                      , time
+                      , text
+                      , hspec
+                      , hspec-wai
+                      , hspec-wai-json
+                      , wai-extra
+                      , vector
+                      , bytestring
+                      , http-types
+                      , servant-server
+                      , wai
+                      , stm
+  other-modules:        SampleData
+                      , AuctionStateSpecs
+                      , EnglishAuctionSpec
+                      , VickreyAuctionSpec
+                      , BlindAuctionStateSpec
+                      , ApiSerializationSpec
+                      , ApiSpec
+                      , SerializationSpec
   default-language:    Haskell2010
 
 source-repository head
