@@ -1,12 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Main where
 import           Data.Time (getCurrentTime)
-import           Web.Spock
-import           Web.Spock.Config
+import           Web.Scotty
 import           AuctionSite.Web.App
 
 main :: IO ()
 main = do
   state <- initAppState
-  spockCfg <- defaultSpockCfg () PCNoDatabase state
-  runSpock 8080 (spock spockCfg (app getCurrentTime))
+  scotty 8080 $ app state getCurrentTime

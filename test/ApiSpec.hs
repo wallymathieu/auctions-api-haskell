@@ -3,8 +3,7 @@ module ApiSpec where
 import           Test.Hspec
 import           Test.Hspec.Wai
 import           Test.Hspec.Wai.JSON ( FromValue(fromValue) )
-import           Web.Spock (spockAsApp, spock)
-import           Web.Spock.Config
+import           Web.Scotty (scottyApp)
 import           Data.Aeson
 import           Data.Vector ( singleton, fromList )
 import           AuctionSite.Web.App
@@ -26,13 +25,11 @@ getCurrentTime = pure $ read "2018-08-04 00:00:00.000000 UTC"
 
 configuredApp = do
   state <- initAppState
-  spockCfg <- defaultSpockCfg () PCNoDatabase state
-
-  spock spockCfg (app getCurrentTime)
+  scottyApp $ app state getCurrentTime
 
 spec :: Spec
 spec =
-    with (spockAsApp configuredApp) $ do addAuctionSpec; addBidSpec
+    with configuredApp $ do addAuctionSpec; addBidSpec
   where
     singletonArray = Array . singleton 
     array = Array . fromList

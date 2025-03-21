@@ -8,7 +8,7 @@ import AuctionSite.Money
 
 import Data.Time
 import Test.Hspec
-import Data.Aeson hiding (json)
+import Data.Aeson
 import qualified SampleData as S
 import qualified Data.ByteString.Lazy.Char8 as BS
 import Text.Read (readMaybe)

@@ -5,7 +5,6 @@ import           GHC.Generics
 import           GHC.Conc         (TVar)
 import           Prelude
 import           Data.Time        (UTCTime)
-import           Web.Spock        (SpockM, SpockAction)
 import           Control.Applicative
 import           Control.Monad    (mzero)
 import           Data.Aeson.Types (Parser)
@@ -56,7 +55,3 @@ instance FromJSON AddAuctionReq where
 
 
 newtype AppState = AppState { appAuctions :: TVar Repository }
-
-type Api = SpockM () () AppState ()
-
-type ApiAction a = SpockAction () () AppState a
