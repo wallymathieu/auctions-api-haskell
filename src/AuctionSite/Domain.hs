@@ -18,7 +18,7 @@ module AuctionSite.Domain (
   Repository,
   -- commands
   Command (..),
-  CommandSuccess (..),
+  Event (..),
   -- domain
   auctions,
   handle
@@ -35,7 +35,7 @@ type Repository = Map.Map AuctionId (Auction, AuctionState)
 
 auctions::Repository -> [Auction]
 auctions r = List.map fst (Map.elems r)
-handle:: Command -> Repository -> (Either Errors CommandSuccess, Repository)
+handle:: Command -> Repository -> (Either Errors Event, Repository)
 handle state repository =
   case state of
   AddAuction time auction ->
