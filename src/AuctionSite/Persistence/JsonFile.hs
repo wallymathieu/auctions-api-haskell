@@ -1,18 +1,37 @@
 module AuctionSite.Persistence.JsonFile where
 import Data.Aeson
+import System.Directory
 
 import qualified AuctionSite.Domain.Commands as C
 import qualified Data.ByteString.Lazy.Char8 as BS
 
-readCommands :: FilePath -> IO (Maybe [C.Command])
-readCommands path=do
-  c <- readFile path
+-- Generic read function for any JSON-decodable type
+readJsonFile :: FromJSON a => FilePath -> IO (Maybe [a])
+readJsonFile path = do
+  doesFileExist path >>= \exists ->
+    if not exists
+    then return Nothing
+    else do
+      c <- readFile path
+      case mapM parseJson (lines c) of
+        Just items -> return $ Just (concat items)
+        Nothing -> return Nothing
+  where parseJson v = decode $ BS.pack v
 
-  case mapM parseCommand (lines c) of
-    Just cs -> return $ Just (concat cs)
-    Nothing -> return Nothing
-  where parseCommand v = decode $ BS.pack v :: Maybe [C.Command]
+-- Generic write function for any JSON-encodable type
+writeJsonFile :: ToJSON a => FilePath -> [a] -> IO ()
+writeJsonFile path items = writeFile path c
+  where c = BS.unpack $ encode items
+
+-- Specialized functions using the generic implementations
+readCommands :: FilePath -> IO (Maybe [C.Command])
+readCommands = readJsonFile
 
 writeCommands :: FilePath -> [C.Command] -> IO ()
-writeCommands path commands=writeFile path c
-  where c = BS.unpack $ encode commands
+writeCommands = writeJsonFile
+
+readEvents :: FilePath -> IO (Maybe [C.Event])
+readEvents = readJsonFile
+
+writeEvents :: FilePath -> [C.Event] -> IO ()
+writeEvents = writeJsonFile

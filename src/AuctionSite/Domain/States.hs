@@ -17,18 +17,18 @@ instance (State a , State b) => (State (Either a b)) where
   inc now = bimap (inc now) (inc now)
 
   addBid bid state =
-    {- 
+    {-
     split a tuple of (Either (a,b) (c,b)) where the second element is of the same type into
     ((Either a c),b)
     -}
     let splitFstJoinSnd c = case c of
                             (Left (a,b)) -> (Left a, b)
                             (Right (a,b)) -> (Right a, b)
-    
-        res = bimap (addBid bid) (addBid bid) state in 
+
+        res = bimap (addBid bid) (addBid bid) state in
     splitFstJoinSnd res
   getBids state=
-    let res = bimap getBids getBids state 
+    let res = bimap getBids getBids state
     in either id id res
   tryGetAmountAndWinner state=
     let res = bimap tryGetAmountAndWinner tryGetAmountAndWinner state

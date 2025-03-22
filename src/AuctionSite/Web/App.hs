@@ -44,8 +44,8 @@ readAuctions = do
 auctionNotFound :: T.Text
 auctionNotFound = "Auction not found"
 
-createBidAction :: IO UTCTime -> AuctionId -> ApiAction a
-createBidAction getCurrentTime tid = do
+createBidOnAction :: (Event-> IO ()) -> IO UTCTime -> AuctionId -> ApiAction a
+createBidOnAction onEvent getCurrentTime tid = do
   req <- jsonBody' :: ApiAction BidReq
   withXAuth $ \userId' -> do
     AppState { appAuctions = auctions' } <- getState
@@ -53,9 +53,11 @@ createBidAction getCurrentTime tid = do
     case res of
       Left (UnknownAuction _)-> setStatus Http.status404 >> text auctionNotFound
       Left err-> setStatus Http.status400 >> json (show err)
-      Right ok-> json ok
+      Right ok-> do
+        liftIO $ onEvent ok
+        json ok
   where
-  mutateState :: BidReq -> User -> UTCTime -> Repository -> (Either Errors CommandSuccess, Repository)
+  mutateState :: BidReq -> User -> UTCTime -> Repository -> (Either Errors Event, Repository)
   mutateState BidReq { amount=amount' } bidder' now current =
     let bid = Bid { bidder=bidder', at=now, bidAmount=M.Amount M.VAC amount', forAuction=tid }
         command = PlaceBid now bid
@@ -73,17 +75,19 @@ getAuctionAction tid = do
           winner = snd <$> maybeAmountAndWinner
       in json (object (["bids" .= map toAuctionBidJson (getBids auctionState), "winner" .= winner, "winnerPrice" .= amount' ] ++ toAuctionListItemKV auction) )
 
-createAuctionAction :: IO UTCTime -> ApiAction a
-createAuctionAction getCurrentTime = do
+createAuctionAction ::  (Event-> IO ()) -> IO UTCTime -> ApiAction a
+createAuctionAction onEvent getCurrentTime = do
   auctionReq <- jsonBody' :: ApiAction AddAuctionReq
   withXAuth $ \userId' -> do
     AppState { appAuctions=auctions' } <- getState
     res <- liftIO ( getCurrentTime >>= (atomically . stateTVar auctions' . mutateState auctionReq userId') )
     case res of
       Left err-> setStatus Http.status400 >> json (show err)
-      Right ok-> json ok
+      Right ok-> do
+        liftIO $ onEvent ok
+        json ok
   where
-  mutateState :: AddAuctionReq -> User -> UTCTime -> Repository -> (Either Errors CommandSuccess, Repository)
+  mutateState :: AddAuctionReq -> User -> UTCTime -> Repository -> (Either Errors Event, Repository)
   mutateState AddAuctionReq { reqId=auctionId', reqStartsAt=startsAt', reqTitle=title', reqEndsAt=endsAt', reqCurrency=cur, reqTyp=typ'} userId' now current =
     let auction = (Auction { auctionId = auctionId', startsAt = startsAt', title = title', expiry = endsAt',
                              seller = userId', typ = typ', auctionCurrency = cur} )
@@ -102,14 +106,15 @@ toAuctionListItemKV Auction { auctionId = aId, startsAt = startsAt', title = tit
 toAuctionBidJson :: Bid -> Value
 toAuctionBidJson Bid { bidAmount=amount', bidder=bidder' } =
   object [ "amount" .= amount', "bidder" .= bidder' ]
-app :: IO UTCTime -> Api
-app getCurrentTime = do
+
+app :: (Event-> IO ()) -> IO UTCTime -> Api
+app onEvent getCurrentTime = do
   get "auctions" getAuctionsAction
   get ("auction" <//> var) getAuctionAction
-  post "auction" (createAuctionAction getCurrentTime)
-  post ("auction" <//> var <//> "bid") (createBidAction getCurrentTime)
+  post "auction" (createAuctionAction onEvent getCurrentTime)
+  post ("auction" <//> var <//> "bid") (createBidOnAction onEvent getCurrentTime)
 
-initAppState :: IO AppState
-initAppState = atomically $ do
-  auctions' <- newTVar Map.empty
+initAppState :: Map.Map AuctionId (Auction, AuctionState) -> IO AppState
+initAppState initialAuctions = atomically $ do
+  auctions' <- newTVar initialAuctions
   return (AppState {appAuctions=auctions'})

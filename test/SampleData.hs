@@ -1,17 +1,17 @@
 {-# LANGUAGE OverloadedStrings #-}
 module SampleData where
-import           Data.Time
 import           AuctionSite.Domain
 import           AuctionSite.Domain.SingleSealedBid
 import           AuctionSite.Money
 
+import           Data.Time
 
 sampleAuctionId ::AuctionId
 sampleAuctionId = 1::AuctionId
 sampleTitle :: String
 sampleTitle = "auction"
 sampleStartsAt :: UTCTime
-sampleStartsAt = read "2016-01-01 08:28:00.607875 UTC"::UTCTime 
+sampleStartsAt = read "2016-01-01 08:28:00.607875 UTC"::UTCTime
 sampleEndsAt :: UTCTime
 sampleEndsAt = read "2016-02-01 08:28:00.607875 UTC"::UTCTime
 sampleBidTime :: UTCTime
