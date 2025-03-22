@@ -4,7 +4,6 @@ module AuctionSite.Web.App where
 import           Web.Spock
 
 import           Data.Aeson
-import           Data.Aeson.Types          (parseMaybe)
 import           GHC.Conc                  (newTVar, readTVarIO, atomically)
 import           Prelude
 import           Control.Monad.IO.Class    (liftIO)
@@ -13,13 +12,11 @@ import qualified Data.Text                 as T
 import qualified Data.Map                  as Map
 import           Data.Time.Clock           (UTCTime)
 import           Control.Concurrent.STM    (stateTVar)
-import qualified Data.ByteString.Base64    as B64
-import           Data.ByteString           (ByteString)
-import qualified Data.ByteString.Lazy      as LB
-import qualified Data.Aeson.Types          as ATyp
+
 import           AuctionSite.Domain
 import qualified AuctionSite.Money         as M
 import           AuctionSite.Web.Types
+import           AuctionSite.Web.Jwt       as Jwt
 
 notFoundJson :: T.Text -> ApiAction a
 notFoundJson msg = setStatus Http.status404 >> json (ApiError { message = msg })
@@ -28,26 +25,9 @@ notFoundJson msg = setStatus Http.status404 >> json (ApiError { message = msg })
 withXAuth :: (User -> ApiAction a) -> ApiAction a
 withXAuth onAuth= do
   auth <- rawHeader "x-jwt-payload"
-  case (auth >>= readAndDecodeBase64) :: Maybe User of
-    Just user' -> onAuth user'
+  case (auth >>= Jwt.decodeJwtUser) :: Maybe JwtUser of
+    Just user' -> onAuth $ unWrapJwtUser user'
     Nothing -> setStatus Http.status401 >> text "Unauthorized"
-  where
-    readAndDecodeBase64 :: ByteString -> Maybe User
-    readAndDecodeBase64 v = decodeBase64 v >>=  decode >>= tryReadUserId
-    tryReadUserId :: Value -> Maybe User
-    tryReadUserId = parseMaybe $ withObject "User" $ \o -> do
-      sub' <- o .: "sub"
-      name' <- o .:? "name"
-      uTyp' <- o .: "u_typ"
-      create sub' name' uTyp'
-    create :: UserId -> Maybe T.Text -> T.Text -> ATyp.Parser User
-    create sub (Just name) "0" = pure $ BuyerOrSeller sub name
-    create sub _           "1" = pure $ Support sub
-    create _   _           _   = ATyp.prependFailure "parsing User failed, " (fail "could not interpret values")
-    decodeBase64 :: ByteString -> Maybe LB.ByteString
-    decodeBase64 v =  case B64.decode v of
-                      Right b -> pure (LB.fromStrict b)
-                      Left _ -> Nothing
 
 readAuction :: Integer -> ApiAction (Maybe (Auction, AuctionState))
 readAuction aId = do
@@ -119,7 +99,7 @@ toAuctionListItemKV :: KeyValue e a => Auction -> [a]
 toAuctionListItemKV Auction { auctionId = aId, startsAt = startsAt', title = title', expiry = expiry', auctionCurrency = currency' } =
   [ "id" .= aId, "startsAt" .= startsAt', "title" .= title', "expiry" .= expiry', "currency" .= currency' ]
 
-toAuctionBidJson :: Bid -> Value 
+toAuctionBidJson :: Bid -> Value
 toAuctionBidJson Bid { bidAmount=amount', bidder=bidder' } =
   object [ "amount" .= amount', "bidder" .= bidder' ]
 app :: IO UTCTime -> Api
