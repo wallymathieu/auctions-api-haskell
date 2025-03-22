@@ -1,14 +1,16 @@
 module EnglishAuctionSpec where
-import AuctionSite.Domain.Core
-import AuctionSite.Domain
-import SampleData
-import AuctionSite.Money
+import           AuctionSite.Domain.Core
+import           AuctionSite.Domain
+import           AuctionSite.Money
 import qualified AuctionSite.Domain.States as S
 import qualified AuctionSite.Domain.TimedAscending as TA
-import Test.Hspec
-import AuctionStateSpecs
-import Text.Read (readMaybe)
-import Data.Time (secondsToNominalDiffTime)
+
+import           SampleData
+import           AuctionStateSpecs
+
+import           Test.Hspec
+import           Text.Read (readMaybe)
+import           Data.Time (secondsToNominalDiffTime)
 
 spec:: ()->SpecWith ()
 spec ()=do

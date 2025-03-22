@@ -4,10 +4,10 @@ import qualified BlindAuctionStateSpec as Blind
 import qualified ApiSerializationSpec
 import qualified ApiSpec
 import qualified SerializationSpec as Serialization
-import Test.Hspec
+import           Test.Hspec
 
 main :: IO ()
-main = hspec $ do 
+main = hspec $ do
   English.spec()
   Vickrey.spec()
   Blind.spec()

@@ -1,14 +1,14 @@
 {-# LANGUAGE DeriveGeneric     #-}
 module AuctionSite.Domain.SingleSealedBid where
-import AuctionSite.Domain.Core
+import           AuctionSite.Domain.Core
 import qualified AuctionSite.Domain.States as S
-import AuctionSite.Domain.Bids
+import           AuctionSite.Domain.Bids
 import qualified Data.Map as Map
 import qualified Data.List as List
-import GHC.Generics
-import Data.Time
-import Data.Aeson hiding (Options)
-import Data.Ord
+import           GHC.Generics
+import           Data.Time
+import           Data.Aeson hiding (Options)
+import           Data.Ord
 
 data Options =
   {- | Sealed first-price auction

@@ -1,17 +1,19 @@
 {-# LANGUAGE OverloadedStrings #-}
 module SerializationSpec where
-import AuctionSite.Domain
+import           AuctionSite.Domain
 import qualified AuctionSite.Domain.Commands as C
 import qualified AuctionSite.Domain.TimedAscending as TA
-import AuctionSite.Persistence.JsonFile
-import AuctionSite.Money
+import           AuctionSite.Persistence.JsonFile
+import           AuctionSite.Money
 
-import Data.Time
-import Test.Hspec
-import Data.Aeson
 import qualified SampleData as S
+
+import           Data.Time
+import           Data.Aeson
 import qualified Data.ByteString.Lazy.Char8 as BS
-import Text.Read (readMaybe)
+import           Text.Read (readMaybe)
+
+import           Test.Hspec
 
 addAuction = C.AddAuction S.sampleStartsAt S.sampleAuction
 bid = C.PlaceBid S.sampleBidTime S.bid1
@@ -26,7 +28,7 @@ spec () = do
     it "can deserialize type" $
       let
         json    = "\"English|VAC0|VAC0|0\""
-        decoded = decode $ BS.pack json :: Maybe AuctionType 
+        decoded = decode $ BS.pack json :: Maybe AuctionType
       in
         decoded `shouldBe` Just timedAscending
     it "read add auction" $
@@ -36,7 +38,7 @@ spec () = do
       in
         decoded `shouldNotBe` Nothing
     it "read place bid" $
-      let 
+      let
         json    = "{\"$type\":\"PlaceBid\",\"at\":\"2020-05-17T08:15:22.948Z\",\"bid\":{\"id\":\"32e692cc3fdb451da9647d6eeca5b2e3\",\"auction\":1,\"user\":\"BuyerOrSeller|a2|Buyer\",\"amount\":\"VAC11\",\"at\":\"2020-05-17T08:15:22.940Z\"}}"
         decoded = decode $ BS.pack json :: Maybe C.Command
       in

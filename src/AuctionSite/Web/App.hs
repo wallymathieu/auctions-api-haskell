@@ -46,17 +46,19 @@ readAuctions appState = do
 auctionNotFound :: TL.Text
 auctionNotFound = "Auction not found"
 
-createBidAction :: AppState -> IO UTCTime -> AuctionId -> ActionM ()
-createBidAction appState getCurrentTime tid = do
+createBidAction :: (Event-> IO ()) -> AppState -> IO UTCTime -> AuctionId -> ActionM ()
+createBidAction onEvent appState getCurrentTime tid = do
   req <- jsonData :: ActionM BidReq
   withXAuth $ \userId' -> do
     res <- liftIO (getCurrentTime >>= (atomically . stateTVar (appAuctions appState) . mutateState req userId'))
     case res of
       Left (UnknownAuction _) -> status Http.status404 >> text auctionNotFound
       Left err -> status Http.status400 >> json (show err)
-      Right ok -> json ok
+      Right ok -> do
+        liftIO $ onEvent ok
+        json ok
   where
-  mutateState :: BidReq -> User -> UTCTime -> Repository -> (Either Errors CommandSuccess, Repository)
+  mutateState :: BidReq -> User -> UTCTime -> Repository -> (Either Errors Event, Repository)
   mutateState BidReq { amount=amount' } bidder' now current =
     let bid = Bid { bidder=bidder', at=now, bidAmount=M.Amount M.VAC amount', forAuction=tid }
         command = PlaceBid now bid
@@ -73,16 +75,18 @@ getAuctionAction appState tid = do
           winner = snd <$> maybeAmountAndWinner
       in json (object (["bids" .= map toAuctionBidJson (getBids auctionState), "winner" .= winner, "winnerPrice" .= amount' ] ++ toAuctionListItemKV auction))
 
-createAuctionAction :: AppState -> IO UTCTime -> ActionM ()
-createAuctionAction appState getCurrentTime = do
+createAuctionAction :: (Event-> IO ()) -> AppState -> IO UTCTime -> ActionM ()
+createAuctionAction onEvent appState getCurrentTime = do
   auctionReq <- jsonData :: ActionM AddAuctionReq
   withXAuth $ \userId' -> do
     res <- liftIO (getCurrentTime >>= (atomically . stateTVar (appAuctions appState) . mutateState auctionReq userId'))
     case res of
       Left err -> status Http.status400 >> json (show err)
-      Right ok -> json ok
+      Right ok -> do
+        liftIO $ onEvent ok
+        json ok
   where
-  mutateState :: AddAuctionReq -> User -> UTCTime -> Repository -> (Either Errors CommandSuccess, Repository)
+  mutateState :: AddAuctionReq -> User -> UTCTime -> Repository -> (Either Errors Event, Repository)
   mutateState AddAuctionReq { reqId=auctionId', reqStartsAt=startsAt', reqTitle=title', reqEndsAt=endsAt', reqCurrency=cur, reqTyp=typ'} userId' now current =
     let auction = (Auction { auctionId = auctionId', startsAt = startsAt', title = title', expiry = endsAt',
                              seller = userId', typ = typ', auctionCurrency = cur} )
@@ -103,8 +107,8 @@ toAuctionBidJson Bid { bidAmount=amount', bidder=bidder' } =
   object [ "amount" .= amount', "bidder" .= bidder' ]
 
 -- Configure Scotty application
-app :: AppState -> IO UTCTime -> ScottyM ()
-app appState getCurrentTime = do
+app :: AppState -> (Event-> IO ()) -> IO UTCTime -> ScottyM ()
+app appState onEvent getCurrentTime = do
   -- Add middleware for logging
   middleware logStdoutDev
 
@@ -113,12 +117,12 @@ app appState getCurrentTime = do
   get "/auction/:id" $ do
     pAuctionId <- pathParam "id"
     getAuctionAction appState pAuctionId
-  post "/auction" $ createAuctionAction appState getCurrentTime
+  post "/auction" $ createAuctionAction onEvent appState getCurrentTime
   post "/auction/:id/bid" $ do
     pAuctionId <- pathParam "id"
-    createBidAction appState getCurrentTime pAuctionId
+    createBidAction onEvent appState getCurrentTime pAuctionId
 
-initAppState :: IO AppState
-initAppState = atomically $ do
-  auctions' <- newTVar Map.empty
+initAppState :: Map.Map AuctionId (Auction, AuctionState) -> IO AppState
+initAppState initialAuctions = atomically $ do
+  auctions' <- newTVar initialAuctions
   return (AppState {appAuctions=auctions'})

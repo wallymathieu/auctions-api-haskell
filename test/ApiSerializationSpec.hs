@@ -1,9 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 module ApiSerializationSpec where
-import Data.Aeson
-import Test.Hspec
-import SampleData
-import Data.Time
+import           Data.Aeson
+import           SampleData
+import           Data.Time
+
+import           Test.Hspec
+
 import           AuctionSite.Domain
 import           AuctionSite.Web.Types
 import qualified AuctionSite.Domain.TimedAscending as DT
