@@ -5,22 +5,17 @@ import           Web.Scotty
 import           Network.Wai.Middleware.RequestLogger (logStdoutDev)
 
 import           Data.Aeson
-import           Data.Aeson.Types          (parseMaybe)
 import           GHC.Conc                  (newTVar, readTVarIO, atomically)
 import           Prelude
 import qualified Network.HTTP.Types.Status as Http
-import qualified Data.Text                 as T
 import qualified Data.Text.Lazy            as TL
-import qualified Data.Text.Lazy.Encoding   as TL
-import qualified Data.ByteString.Lazy.Char8 as LB
 import qualified Data.Map                  as Map
 import           Data.Time.Clock           (UTCTime)
 import           Control.Concurrent.STM    (stateTVar)
-import qualified Data.ByteString.Base64    as B64
-import qualified Data.Aeson.Types          as ATyp
 import           AuctionSite.Domain
 import qualified AuctionSite.Money         as M
 import           AuctionSite.Web.Types
+import           AuctionSite.Web.Jwt       as Jwt
 
 -- Convert status code to Scotty
 notFoundJson :: TL.Text -> ActionM ()
@@ -34,28 +29,9 @@ raiseError code msg = status (Http.mkStatus code "") >> json msg
 withXAuth :: (User -> ActionM ()) -> ActionM ()
 withXAuth onAuth = do
   auth <- header "x-jwt-payload"
-  case auth >>= convertToUser of
-    Just user' -> onAuth user'
+  case auth >>= Jwt.decodeJwtUser of
+    Just user' -> onAuth $ unWrapJwtUser user'
     Nothing -> status Http.status401 >> text "Unauthorized"
-  where
-    convertToUser :: TL.Text -> Maybe User
-    convertToUser txt = 
-      let bytes = LB.toStrict (TL.encodeUtf8 txt)
-      in case B64.decode bytes of
-          Right decodedBytes -> decode (LB.fromStrict decodedBytes) >>= tryReadUserId
-          Left _ -> Nothing
-    
-    tryReadUserId :: Value -> Maybe User
-    tryReadUserId = parseMaybe $ withObject "User" $ \o -> do
-      sub' <- o .: "sub"
-      name' <- o .:? "name"
-      uTyp' <- o .: "u_typ"
-      create sub' name' uTyp'
-    
-    create :: UserId -> Maybe T.Text -> T.Text -> ATyp.Parser User
-    create sub (Just name) "0" = pure $ BuyerOrSeller sub name
-    create sub _           "1" = pure $ Support sub
-    create _   _           _   = ATyp.prependFailure "parsing User failed, " (fail "could not interpret values")
 
 readAuction :: AppState -> Integer -> ActionM (Maybe (Auction, AuctionState))
 readAuction appState aId = do
@@ -122,7 +98,7 @@ toAuctionListItemKV :: KeyValue e a => Auction -> [a]
 toAuctionListItemKV Auction { auctionId = aId, startsAt = startsAt', title = title', expiry = expiry', auctionCurrency = currency' } =
   [ "id" .= aId, "startsAt" .= startsAt', "title" .= title', "expiry" .= expiry', "currency" .= currency' ]
 
-toAuctionBidJson :: Bid -> Value 
+toAuctionBidJson :: Bid -> Value
 toAuctionBidJson Bid { bidAmount=amount', bidder=bidder' } =
   object [ "amount" .= amount', "bidder" .= bidder' ]
 
@@ -131,7 +107,7 @@ app :: AppState -> IO UTCTime -> ScottyM ()
 app appState getCurrentTime = do
   -- Add middleware for logging
   middleware logStdoutDev
-  
+
   -- Define routes
   get "/auctions" $ getAuctionsAction appState
   get "/auction/:id" $ do

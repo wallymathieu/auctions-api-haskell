@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 module ApiSerializationSpec where
-import Data.Aeson hiding (json)
+import Data.Aeson
 import Test.Hspec
 import SampleData
 import Data.Time
@@ -14,8 +14,8 @@ spec ()=do
   let zeroVAC = M.Amount M.VAC 0
 
   describe "auction deserialization" $ do
-    let startsAt' = read "2016-01-01 00:00:00.000000 UTC"::UTCTime 
-    let endsAt = read "2016-02-01 00:00:00.000000 UTC"::UTCTime 
+    let startsAt' = read "2016-01-01 00:00:00.000000 UTC"::UTCTime
+    let endsAt = read "2016-02-01 00:00:00.000000 UTC"::UTCTime
     let firstAuction = decode "{ \"id\":1,\"startsAt\":\"2016-01-01T00:00:00.000Z\",\"endsAt\":\"2016-02-01T00:00:00.000Z\",\"title\":\"First auction\" }" :: Maybe AddAuctionReq
 
     it "can understand first auction" $
