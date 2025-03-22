@@ -1,5 +1,3 @@
--- app/Main.hs
-{-# LANGUAGE OverloadedStrings #-}
 module Main where
 
 import qualified Data.Time as Time

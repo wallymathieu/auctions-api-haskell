@@ -2,9 +2,9 @@ name: Haskell CI
 
 on:
   push:
-    branches: [ "master", "spock", "servant" ]
+    branches: [ "master", "main", "spock", "scotty", "servant" ]
   pull_request:
-    branches: [ "master", "spock", "servant" ]
+    branches: [ "master", "main", "spock", "scotty", "servant" ]
 
 permissions:
   contents: read
@@ -19,6 +19,8 @@ jobs:
     - uses: haskell-actions/setup@v2.7.10
       with:
         # see https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2404-Readme.md
+        # Here we select a lower version in order to avoid some issues with the latest version of GHC.
+        # We should upgrade this at some point, but right now it is not too old.
         ghc-version: '9.4.7'
         # cabal-version: '3.6'
 

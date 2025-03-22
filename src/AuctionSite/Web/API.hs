@@ -1,10 +1,9 @@
--- src/AuctionSite/Web/API.hs
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE NamedFieldPuns #-}
-{-# LANGUAGE MultiParamTypeClasses #-} -- Add this pragma
+{-# LANGUAGE MultiParamTypeClasses #-}
 module AuctionSite.Web.API where
 
 import Control.Concurrent.STM
