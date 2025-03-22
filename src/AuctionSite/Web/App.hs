@@ -4,7 +4,7 @@ import Control.Concurrent.STM
 import Data.Map as Map
 import Data.Time.Clock (UTCTime)
 
-import AuctionSite.Web.API (app, AppEnv(..))
+import AuctionSite.Web.API (AppEnv(..))
 import AuctionSite.Web.Types (Repository)
 
 -- | Initialize app state

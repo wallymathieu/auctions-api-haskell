@@ -23,13 +23,14 @@ import qualified Data.Text.Encoding as TE
 import AuctionSite.Domain hiding (Repository)
 import AuctionSite.Money
 import AuctionSite.Web.Types (BidReq(..), AddAuctionReq(..), Repository)
+import AuctionSite.Web.Jwt (JwtUser(..), unWrapJwtUser)
 
 -- API specification
 type AuctionAPI =
   "auctions" :> Get '[JSON] [AuctionListItem]
   :<|> "auction" :> Capture "id" AuctionId :> Get '[JSON] AuctionDetails
-  :<|> "auction" :> Header "x-jwt-payload" User :> ReqBody '[JSON] AddAuctionReq :> Post '[JSON] CommandSuccess
-  :<|> "auction" :> Capture "id" AuctionId :> "bid" :> Header "x-jwt-payload" User :> ReqBody '[JSON] BidReq :> Post '[JSON] CommandSuccess
+  :<|> "auction" :> Header "x-jwt-payload" JwtUser :> ReqBody '[JSON] AddAuctionReq :> Post '[JSON] CommandSuccess
+  :<|> "auction" :> Capture "id" AuctionId :> "bid" :> Header "x-jwt-payload" JwtUser :> ReqBody '[JSON] BidReq :> Post '[JSON] CommandSuccess
 
 -- Data types for responses
 data AuctionListItem = AuctionListItem
@@ -141,7 +142,7 @@ getAuctionHandler auctionId' = do
       , abBidder = bidder
       }
 
-createAuctionHandler :: Maybe User -> AddAuctionReq -> AppM CommandSuccess
+createAuctionHandler :: Maybe JwtUser -> AddAuctionReq -> AppM CommandSuccess
 createAuctionHandler maybeUser req = do
   env <- ask
   let appAuctions' = appAuctions env
@@ -155,7 +156,7 @@ createAuctionHandler maybeUser req = do
             , startsAt = reqStartsAt req
             , title = reqTitle req
             , expiry = reqEndsAt req
-            , seller = userId'
+            , seller = unWrapJwtUser userId'
             , typ = reqTyp req
             , auctionCurrency = reqCurrency req
             }
@@ -165,7 +166,7 @@ createAuctionHandler maybeUser req = do
         Left err -> throwError err400 { errBody = LB.fromStrict $ TE.encodeUtf8 $ T.pack $ show err }
         Right success -> return success
 
-createBidHandler :: AuctionId -> Maybe User -> BidReq -> AppM CommandSuccess
+createBidHandler :: AuctionId -> Maybe JwtUser -> BidReq -> AppM CommandSuccess
 createBidHandler auctionId' maybeUser req = do
   env <- ask
   let appAuctions' = appAuctions env
@@ -176,7 +177,7 @@ createBidHandler auctionId' maybeUser req = do
       now <- liftIO getCurrentTime'
       let bid = Bid
             { forAuction = auctionId'
-            , bidder = userId'
+            , bidder = unWrapJwtUser userId'
             , at = now
             , bidAmount = Amount VAC (amount req)
             }

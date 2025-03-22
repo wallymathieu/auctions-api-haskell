@@ -8,10 +8,6 @@ import qualified Data.Text as T
 import Text.Printf (printf)
 import Data.Aeson.Types (Parser)
 import qualified Data.Aeson.Types as ATyp
-import qualified Data.ByteString as BS
-import qualified Data.ByteString.Lazy as LB
-import qualified Data.ByteString.Base64 as B64
-import Servant (FromHttpApiData, parseHeader)
 
 type UserId = T.Text
 data User =
@@ -33,36 +29,6 @@ instance FromJSON User where
       interpret ["Support", userId'] = pure $ Support userId'
       interpret _ = ATyp.prependFailure "parsing User failed, " (fail "could not interpret values")
 
-instance FromHttpApiData User where
-  parseHeader :: BS.ByteString -> Either T.Text User
-  parseHeader t = 
-    case parseUserFromJWT t of
-    Just u -> Right u
-    Nothing -> Left "unknown"
-
-parseUserFromJWT :: BS.ByteString -> Maybe User
-parseUserFromJWT token = do
-  readAndDecodeBase64 token
-  where
-    readAndDecodeBase64 :: BS.ByteString -> Maybe User
-    readAndDecodeBase64 v = decodeBase64 v >>= decode >>= tryReadJWTUser
-    decodeBase64 :: BS.ByteString -> Maybe LB.ByteString
-    decodeBase64 v =  case B64.decode v of
-                      Right b -> pure (LB.fromStrict b)
-                      Left _ -> Nothing
-
-tryReadJWTUser :: Value -> Maybe User
-tryReadJWTUser = ATyp.parseMaybe $ withObject "User" $ \o -> do
-  sub' <- o .: "sub"
-  name' <- o .:? "name"
-  uTyp' <- o .: "u_typ"
-  createUser sub' name' uTyp'
-  where
-    createUser :: UserId -> Maybe T.Text -> T.Text -> Parser User
-    createUser sub (Just name) "0" = pure $ BuyerOrSeller sub name
-    createUser sub _           "1" = pure $ Support sub
-    createUser _   _           _   = ATyp.prependFailure "parsing User failed, " (fail "could not interpret values")
-
 type AuctionId = Integer
 
 data Errors =
@@ -76,4 +42,3 @@ data Errors =
   | MustPlaceBidOverHighestBid Amount
   | AlreadyPlacedBid
   deriving (Eq,Show)
-  
