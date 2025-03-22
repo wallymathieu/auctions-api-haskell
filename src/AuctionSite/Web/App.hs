@@ -1,5 +1,3 @@
--- src/AuctionSite/Web/App.hs
-{-# LANGUAGE OverloadedStrings #-}
 module AuctionSite.Web.App where
 
 import Control.Concurrent.STM
@@ -11,7 +9,7 @@ import AuctionSite.Web.Types (Repository)
 
 -- | Initialize app state
 initAppState :: IO (TVar Repository)
-initAppState = atomically $ newTVar Map.empty
+initAppState = newTVarIO Map.empty
 
 -- | Initialize the application environment
 initAppEnv :: IO UTCTime -> IO AppEnv

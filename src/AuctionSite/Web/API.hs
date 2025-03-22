@@ -3,10 +3,8 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE MultiParamTypeClasses #-} -- Add this pragma
-{-# LANGUAGE InstanceSigs #-}
 module AuctionSite.Web.API where
 
 import Control.Concurrent.STM
@@ -191,7 +189,7 @@ createBidHandler auctionId' maybeUser req = do
 
 -- Convert AppM to Handler
 nt :: AppEnv -> AppM a -> Handler a
-nt env = flip runReaderT env
+nt = flip runReaderT
 
 -- Server
 server :: AppEnv -> Server AuctionAPI
