@@ -1,14 +1,14 @@
 module AuctionStateSpecs where
 import qualified AuctionSite.Domain.States as S
-import SampleData
-import Data.Time
-import Test.Hspec
+import           SampleData
+import           Data.Time
+import           Test.Hspec
 
 incrementSpec baseState =
   describe "increment time" $ do
     it "can increment twice" $
       let s= S.inc sampleBidTime baseState
-          s2= S.inc sampleBidTime s 
+          s2= S.inc sampleBidTime s
       in s `shouldBe` s2
 
     it "wont end just after start" $

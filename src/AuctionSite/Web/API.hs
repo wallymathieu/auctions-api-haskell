@@ -28,8 +28,8 @@ import AuctionSite.Web.Jwt (JwtUser(..), unWrapJwtUser)
 type AuctionAPI =
   "auctions" :> Get '[JSON] [AuctionListItem]
   :<|> "auction" :> Capture "id" AuctionId :> Get '[JSON] AuctionDetails
-  :<|> "auction" :> Header "x-jwt-payload" JwtUser :> ReqBody '[JSON] AddAuctionReq :> Post '[JSON] CommandSuccess
-  :<|> "auction" :> Capture "id" AuctionId :> "bid" :> Header "x-jwt-payload" JwtUser :> ReqBody '[JSON] BidReq :> Post '[JSON] CommandSuccess
+  :<|> "auction" :> Header "x-jwt-payload" JwtUser :> ReqBody '[JSON] AddAuctionReq :> Post '[JSON] Event
+  :<|> "auction" :> Capture "id" AuctionId :> "bid" :> Header "x-jwt-payload" JwtUser :> ReqBody '[JSON] BidReq :> Post '[JSON] Event
 
 -- Data types for responses
 data AuctionListItem = AuctionListItem
@@ -87,6 +87,7 @@ instance ToJSON AuctionDetails where
 data AppEnv = AppEnv
   { appAuctions :: TVar Repository
   , getCurrentTime :: IO UTCTime
+  , onEvent :: Event -> IO ()
   } -- No deriving here to make it accessible from other modules
 
 type AppM = ReaderT AppEnv Handler
@@ -141,7 +142,7 @@ getAuctionHandler auctionId' = do
       , abBidder = bidder
       }
 
-createAuctionHandler :: Maybe JwtUser -> AddAuctionReq -> AppM CommandSuccess
+createAuctionHandler :: Maybe JwtUser -> AddAuctionReq -> AppM Event
 createAuctionHandler maybeUser req = do
   env <- ask
   let appAuctions' = appAuctions env
@@ -165,7 +166,7 @@ createAuctionHandler maybeUser req = do
         Left err -> throwError err400 { errBody = LB.fromStrict $ TE.encodeUtf8 $ T.pack $ show err }
         Right success -> return success
 
-createBidHandler :: AuctionId -> Maybe JwtUser -> BidReq -> AppM CommandSuccess
+createBidHandler :: AuctionId -> Maybe JwtUser -> BidReq -> AppM Event
 createBidHandler auctionId' maybeUser req = do
   env <- ask
   let appAuctions' = appAuctions env
@@ -201,16 +202,17 @@ server env =
     :<|> createBidHandler
 
 -- Initialize the app state
-initAppState :: IO UTCTime -> IO AppEnv
-initAppState getTime = do
-  auctions' <- newTVarIO Map.empty
+initAppState :: Repository -> (Event -> IO ()) -> IO UTCTime -> IO AppEnv
+initAppState repository onEvent' getTime = do
+  auctions' <- newTVarIO repository
   return AppEnv
     { appAuctions = auctions'
     , getCurrentTime = getTime
+    , onEvent = onEvent'
     }
 
 -- Main app
-app :: IO UTCTime -> IO Application
-app getTime = do
-  env <- initAppState getTime
+app :: Repository -> (Event -> IO ()) -> IO UTCTime -> IO Application
+app repository onEvent' getTime = do
+  env <- initAppState repository onEvent' getTime
   return $ serve auctionAPI (server env)
