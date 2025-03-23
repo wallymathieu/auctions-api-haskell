@@ -10,13 +10,14 @@ import qualified Data.ByteString.Base64    as B64
 import qualified Data.Aeson.Types          as ATyp
 import qualified Data.Text                 as T
 import           AuctionSite.Domain
-import           Servant                   (FromHttpApiData, parseHeader)
+import           Servant                   (FromHttpApiData, parseHeader, parseUrlPiece)
 
 instance FromHttpApiData JwtUser where
   parseHeader t =
     case parseUserFromJWT t of
     Just u -> Right u
     Nothing -> Left "unknown"
+  parseUrlPiece = const $ Left "Intentionally not implemented: We don't expect to receive a JWT in the URL"
 
 parseUserFromJWT :: BS.ByteString -> Maybe JwtUser
 parseUserFromJWT token = do
