@@ -1,5 +1,4 @@
 module Main where
-import           AuctionSite.Web.App
 import           AuctionSite.Domain.Commands
 import           AuctionSite.Persistence.JsonFile
 import           AuctionSite.Web.API (app)
@@ -8,7 +7,7 @@ import qualified Data.Time as Time
 import           Network.Wai.Handler.Warp (run)
 import qualified Data.Map as Map
 
-eventsFile = "events.json"
+eventsFile = "tmp/events.jsonl"
 onEvent :: Event -> IO ()
 onEvent e = writeEvents eventsFile [e]
 main :: IO ()

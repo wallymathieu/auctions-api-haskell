@@ -28,7 +28,6 @@ library
                       , AuctionSite.Persistence.JsonFile
                       , AuctionSite.Web.Types
                       , AuctionSite.Web.API
-                      , AuctionSite.Web.App
                       , AuctionSite.Web.Jwt
   ghc-options:        -Wall -fwarn-tabs
   other-modules:
@@ -87,6 +86,7 @@ test-suite auction-site-test
                       , servant-server
                       , wai
                       , stm
+                      , directory
   other-modules:        SampleData
                       , AuctionStateSpecs
                       , EnglishAuctionSpec
