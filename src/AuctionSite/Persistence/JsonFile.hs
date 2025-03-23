@@ -20,7 +20,11 @@ readJsonFile path = do
 
 -- Generic write function for any JSON-encodable type
 writeJsonFile :: ToJSON a => FilePath -> [a] -> IO ()
-writeJsonFile path items = writeFile path c
+writeJsonFile path items =
+  doesFileExist path >>= \exists ->
+    if not exists
+    then writeFile path c
+    else appendFile path ("\n"++c)
   where c = BS.unpack $ encode items
 
 -- Specialized functions using the generic implementations

@@ -12,6 +12,8 @@ import           Data.Time
 import           Data.Aeson
 import qualified Data.ByteString.Lazy.Char8 as BS
 import           Text.Read (readMaybe)
+import           System.Directory
+
 
 import           Test.Hspec
 
@@ -77,3 +79,24 @@ spec () = do
         json = decode "{\"$type\":\"PlaceBid\",\"at\":\"2016-02-01T07:28:00.607875Z\",\"bid\":{\"amount\":\"SEK10\",\"at\":\"2016-01-01T08:28:00.607875000001Z\",\"auction\":1,\"user\":\"BuyerOrSeller|Buyer_1|Buyer 1\"}}"
       in
         Just encoded `shouldBe` json
+  describe "read and write json" $ do
+    it "reading commands from jsonl" $ do
+      removeIfExists tmpSampleCommands
+      cmds <- readCommands "./test/samples/sample-commands.jsonl"
+      case cmds of
+        Just cmds' -> do
+          let (a,b) = splitAt 4 cmds'
+          writeCommands tmpSampleCommands a
+          writeCommands tmpSampleCommands b
+          cmds2 <- readCommands tmpSampleCommands
+          cmds2 `shouldBe` cmds
+        Nothing -> error "no commands"
+
+removeIfExists :: FilePath -> IO ()
+removeIfExists fileName =
+    doesFileExist fileName >>= \exists ->
+      if not exists
+      then return ()
+      else removeFile fileName
+
+tmpSampleCommands = "./tmp/sample-commands.jsonl"

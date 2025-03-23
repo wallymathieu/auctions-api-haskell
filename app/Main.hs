@@ -7,7 +7,7 @@ import           AuctionSite.Web.App
 import           AuctionSite.Domain.Commands
 import           AuctionSite.Persistence.JsonFile
 
-eventsFile = "events.json"
+eventsFile = "tmp/events.jsonl"
 onEvent :: Event -> IO ()
 onEvent e = writeEvents eventsFile [e]
 main :: IO ()
