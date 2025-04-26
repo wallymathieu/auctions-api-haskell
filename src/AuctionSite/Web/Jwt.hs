@@ -28,7 +28,7 @@ decodeJwtUser :: ByteString -> Maybe JwtUser
 decodeJwtUser byteString = decodeBase64 byteString >>= decode >>= tryReadUserId
   where
     tryReadUserId :: Value -> Maybe JwtUser
-    tryReadUserId = parseMaybe $ parseJSON
+    tryReadUserId = parseMaybe parseJSON
     decodeBase64 :: ByteString -> Maybe LB.ByteString
     decodeBase64 v = case B64.decode v of
                       Right b -> pure (LB.fromStrict b)
