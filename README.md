@@ -64,16 +64,16 @@ The JWT payload should be Base64 encoded when sent in the header.
 ### Endpoints
 
 - `GET /auctions` - List all auctions
-- `GET /auction/:id` - Get auction details, including bids and winner information if available
-- `POST /auction` - Create a new auction
-- `POST /auction/:id/bid` - Place a bid on an auction
+- `GET /auctions/:id` - Get auction details, including bids and winner information if available
+- `POST /auctions` - Create a new auction
+- `POST /auctions/:id/bids` - Place a bid on an auction
 
 ### Example Requests
 
 #### Create an auction
 
 ```bash
-curl -X POST http://localhost:8080/auction \
+curl -X POST http://localhost:8080/auctions \
   -H "Content-Type: application/json" \
   -H "x-jwt-payload: eyJzdWIiOiJhMSIsICJuYW1lIjoiVGVzdCIsICJ1X3R5cCI6IjAifQo=" \
   -d '{
@@ -88,7 +88,7 @@ curl -X POST http://localhost:8080/auction \
 #### Place a bid
 
 ```bash
-curl -X POST http://localhost:8080/auction/1/bid \
+curl -X POST http://localhost:8080/auctions/1/bids \
   -H "Content-Type: application/json" \
   -H "x-jwt-payload: eyJzdWIiOiJhMiIsICJuYW1lIjoiQnV5ZXIiLCAidV90eXAiOiIwIn0K=" \
   -d '{
