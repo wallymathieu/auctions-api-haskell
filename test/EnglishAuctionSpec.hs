@@ -1,7 +1,6 @@
 module EnglishAuctionSpec where
 import           AuctionSite.Domain.Core
 import           AuctionSite.Domain
-import           AuctionSite.Money
 import qualified AuctionSite.Domain.States as S
 import qualified AuctionSite.Domain.TimedAscending as TA
 
@@ -14,7 +13,7 @@ import           Data.Time (secondsToNominalDiffTime)
 
 spec:: ()->SpecWith ()
 spec ()=do
-  let timedAscAuction = sampleAuctionOfTyp (TimedAscending (TA.defaultOptions SEK))
+  let timedAscAuction = sampleAuctionOfTyp (TimedAscending TA.defaultOptions)
   let emptyAscAuctionState = emptyState timedAscAuction
   let emptyEndedAscAuctionState = S.inc sampleEndsAt emptyAscAuctionState
 
@@ -30,12 +29,12 @@ spec ()=do
       result2 `shouldBe` Right ()
 
     it "can end" $
-      emptyEndedAscAuctionState `shouldBe` Right (TA.HasEnded [] sampleEndsAt (TA.defaultOptions SEK))
+      emptyEndedAscAuctionState `shouldBe` Right (TA.HasEnded [] sampleEndsAt TA.defaultOptions)
 
     let stateEndedAfterTwoBids = S.inc sampleEndsAt stateWith2Bids
 
     it "ended with two bids" $
-      stateEndedAfterTwoBids `shouldBe` Right (TA.HasEnded [ bid2, bid1 ] sampleEndsAt (TA.defaultOptions SEK))
+      stateEndedAfterTwoBids `shouldBe` Right (TA.HasEnded [ bid2, bid1 ] sampleEndsAt TA.defaultOptions)
 
     it "cant bid after auction has ended" $
       let errAfterEnded=snd (S.addBid sampleBid stateEndedAfterTwoBids)
@@ -51,16 +50,16 @@ spec ()=do
 
     incrementSpec emptyAscAuctionState
   describe "english auction type serialization" $ do
-    let sampleTypStr = "English|VAC0|VAC0|0"
-    let sampleTyp = TA.defaultOptions VAC
+    let sampleTypStr = "English|0|0|0"
+    let sampleTyp = TA.defaultOptions
     it "can deserialize sample typ" $
       let parsed = readMaybe sampleTypStr :: Maybe TA.Options
       in parsed `shouldBe` Just sampleTyp
     it "can serialize sample typ" $
       show sampleTyp `shouldBe` sampleTypStr
 
-    let sampleWithValuesTypStr = "English|VAC10|VAC20|30"
-    let sampleWithValuesTyp = TA.Options (Amount VAC 10) (Amount VAC 20) (secondsToNominalDiffTime 30)
+    let sampleWithValuesTypStr = "English|10|20|30"
+    let sampleWithValuesTyp = TA.Options 10 20 (secondsToNominalDiffTime 30)
     it "can deserialize sample with values typ" $
       let parsed = readMaybe sampleWithValuesTypStr :: Maybe TA.Options
       in parsed `shouldBe` Just sampleWithValuesTyp

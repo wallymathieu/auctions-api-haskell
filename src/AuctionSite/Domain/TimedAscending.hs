@@ -1,10 +1,9 @@
 {-# LANGUAGE DeriveGeneric, OverloadedStrings     #-}
 module AuctionSite.Domain.TimedAscending where
-import AuctionSite.Money
+import AuctionSite.Money ( AmountValue )
 import AuctionSite.Domain.Core
 import qualified AuctionSite.Domain.States as S
 import AuctionSite.Domain.Bids
-import Prelude hiding ((+))
 import qualified Data.Aeson as A
 import Text.Printf (printf)
 import qualified Data.Text as T
@@ -18,10 +17,10 @@ data Options = Options {
   {- | the seller has set a minimum sale price in advance (the 'reserve' price)
     and the final bid does not reach that price the item remains unsold
   If the reserve price is 0, that is the equivalent of not setting it. -}
-  reservePrice:: Amount,
+  reservePrice:: AmountValue,
   {- | Sometimes the auctioneer sets a minimum amount by which the next bid must exceed the current highest bid.
      Having min raise equal to 0 is the equivalent of not setting it.-}
-  minRaise:: Amount,
+  minRaise:: AmountValue,
   {- | If no competing bidder challenges the standing bid within a given time frame,
      the standing bid becomes the winner, and the item is sold to the highest bidder
      at a price equal to his or her bid. -}
@@ -48,8 +47,8 @@ instance Read Options where
             _ -> []
       interpret _ = []
 
-defaultOptions:: Currency->Options
-defaultOptions c = Options { reservePrice =Amount c 0, minRaise =Amount c 0, timeFrame = 0::NominalDiffTime }
+defaultOptions:: Options
+defaultOptions = Options { reservePrice = 0, minRaise = 0, timeFrame = 0::NominalDiffTime }
 
 data State =
   AwaitingStart UTCTime UTCTime Options

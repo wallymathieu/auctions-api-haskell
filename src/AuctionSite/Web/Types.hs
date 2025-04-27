@@ -50,7 +50,7 @@ instance FromJSON AddAuctionReq where
     where
       parseCurrency = (v .: "currency") <|> pure M.VAC
       parseTyp :: Parser AuctionType
-      parseTyp = parseCurrency >>= (\c -> (v .: "typ") <|> pure (TimedAscending $ DT.defaultOptions c))
+      parseTyp = (v .: "typ") <|> pure (TimedAscending DT.defaultOptions)
  parseJSON _ = mzero
 
 

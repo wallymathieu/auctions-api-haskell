@@ -13,7 +13,6 @@ import qualified Data.Map                  as Map
 import           Data.Time.Clock           (UTCTime)
 import           Control.Concurrent.STM    (stateTVar)
 import           AuctionSite.Domain
-import qualified AuctionSite.Money         as M
 import           AuctionSite.Web.Types
 import           AuctionSite.Web.Jwt       as Jwt
 
@@ -60,7 +59,7 @@ createBidAction onEvent appState getCurrentTime tid = do
   where
   mutateState :: BidReq -> User -> UTCTime -> Repository -> (Either Errors Event, Repository)
   mutateState BidReq { amount=amount' } bidder' now current =
-    let bid = Bid { bidder=bidder', at=now, bidAmount=M.Amount M.VAC amount', forAuction=tid }
+    let bid = Bid { bidder=bidder', at=now, bidAmount= amount', forAuction=tid }
         command = PlaceBid now bid
     in handle command current
 
@@ -114,11 +113,11 @@ app appState onEvent getCurrentTime = do
 
   -- Define routes
   get "/auctions" $ getAuctionsAction appState
-  get "/auction/:id" $ do
+  get "/auctions/:id" $ do
     pAuctionId <- pathParam "id"
     getAuctionAction appState pAuctionId
-  post "/auction" $ createAuctionAction onEvent appState getCurrentTime
-  post "/auction/:id/bid" $ do
+  post "/auctions" $ createAuctionAction onEvent appState getCurrentTime
+  post "/auctions/:id/bids" $ do
     pAuctionId <- pathParam "id"
     createBidAction onEvent appState getCurrentTime pAuctionId
 

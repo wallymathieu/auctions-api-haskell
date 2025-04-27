@@ -2,6 +2,7 @@
 module AuctionSite.Money (
   Currency(..),
   Amount(..),
+  AmountValue,
   amountCurrency,
   amountValue,
   (+)
@@ -31,14 +32,16 @@ instance Read Amount where
       interpret (Left _) = []
       currencyParser:: Parsec String st Currency
       currencyParser = read <$> many letter
-      amountParser:: Parsec String st Integer
+      amountParser:: Parsec String st AmountValue
       amountParser = read <$> many digit
       parser = Amount <$> currencyParser <*> amountParser
+
+type AmountValue = Integer
 
 amountCurrency :: Amount -> Currency
 amountCurrency (Amount c _) = c
 
-amountValue :: Amount -> Integer
+amountValue :: Amount -> AmountValue
 amountValue (Amount _ v) = v
 
 (+) :: Amount -> Amount -> Amount

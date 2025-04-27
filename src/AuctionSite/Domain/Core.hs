@@ -36,9 +36,7 @@ data Errors =
   | AuctionHasEnded AuctionId
   | AuctionHasNotStarted AuctionId
   | SellerCannotPlaceBids (UserId , AuctionId)
-  | CurrencyConversion Currency
   | InvalidUserData String
-  | MustPlaceBidOverHighestBid Amount
+  | MustPlaceBidOverHighestBid AmountValue
   | AlreadyPlacedBid
   deriving (Eq,Show)
-  
