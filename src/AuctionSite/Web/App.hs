@@ -110,9 +110,9 @@ toAuctionBidJson Bid { bidAmount=amount', bidder=bidder' } =
 app :: (Event-> IO ()) -> IO UTCTime -> Api
 app onEvent getCurrentTime = do
   get "auctions" getAuctionsAction
-  get ("auction" <//> var) getAuctionAction
-  post "auction" (createAuctionAction onEvent getCurrentTime)
-  post ("auction" <//> var <//> "bid") (createBidOnAction onEvent getCurrentTime)
+  get ("auctions" <//> var) getAuctionAction
+  post "auctions" (createAuctionAction onEvent getCurrentTime)
+  post ("auctions" <//> var <//> "bids") (createBidOnAction onEvent getCurrentTime)
 
 initAppState :: Map.Map AuctionId (Auction, AuctionState) -> IO AppState
 initAppState initialAuctions = atomically $ do

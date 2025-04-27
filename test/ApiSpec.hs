@@ -71,15 +71,15 @@ spec =
             "user" .= String "BuyerOrSeller|a2|Buyer",
             "amount" .= String "VAC11",
             "at" .= String "2018-08-04T00:00:00Z" ] ]
-    addAuctionOk = postWithHeader "/auction" [(xJwtPayload, seller1)] firstAuctionReqJson `shouldRespondWith` fromValue auctionAddedJsonValue
-    addBidOk = postWithHeader "/auction/1/bid" [(xJwtPayload, buyer1)] "{\"amount\":11}" `shouldRespondWith` fromValue bidAcceptedJsonValue
+    addAuctionOk = postWithHeader "/auctions" [(xJwtPayload, seller1)] firstAuctionReqJson `shouldRespondWith` fromValue auctionAddedJsonValue
+    addBidOk = postWithHeader "/auctions/1/bids" [(xJwtPayload, buyer1)] "{\"amount\":11}" `shouldRespondWith` fromValue bidAcceptedJsonValue
 
     addAuctionSpec = describe "add auction" $ do
       it "possible to add auction" addAuctionOk
-      it "not possible to same auction twice" $ do addAuctionOk; postWithHeader "/auction" [(xJwtPayload, seller1)] firstAuctionReqJson `shouldRespondWith` "\"AuctionAlreadyExists 1\"" {matchStatus = 400}
-      it "returns added auction" $ do addAuctionOk; get "/auction/1" `shouldRespondWith` fromValue auctionWithoutBidJsonValue
+      it "not possible to same auction twice" $ do addAuctionOk; postWithHeader "/auctions" [(xJwtPayload, seller1)] firstAuctionReqJson `shouldRespondWith` "\"AuctionAlreadyExists 1\"" {matchStatus = 400}
+      it "returns added auction" $ do addAuctionOk; get "/auctions/1" `shouldRespondWith` fromValue auctionWithoutBidJsonValue
       it "returns added auctions" $ do addAuctionOk; get "/auctions" `shouldRespondWith` fromValue auctionWithoutBidListJsonValue
     addBidSpec = describe "add bids to auction" $ do
       it "possible to add bid to auction" $ do addAuctionOk ; addBidOk
-      it "possible to see the added bids" $ do addAuctionOk ; addBidOk ; get "/auction/1" `shouldRespondWith` fromValue auctionWithBidJsonValue
-      it "not possible to add bid to non existant auction" $ postWithHeader "/auction/2/bid" [(xJwtPayload, buyer1)] "{\"amount\":10}" `shouldRespondWith` "Auction not found" {matchStatus = 404}
+      it "possible to see the added bids" $ do addAuctionOk ; addBidOk ; get "/auctions/1" `shouldRespondWith` fromValue auctionWithBidJsonValue
+      it "not possible to add bid to non existant auction" $ postWithHeader "/auctions/2/bids" [(xJwtPayload, buyer1)] "{\"amount\":10}" `shouldRespondWith` "Auction not found" {matchStatus = 404}
