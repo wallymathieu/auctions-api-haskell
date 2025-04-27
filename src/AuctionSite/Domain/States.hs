@@ -9,7 +9,7 @@ class State a where
   inc :: UTCTime -> a -> a
   addBid :: Bid -> a -> (a, Either Errors ())
   getBids :: a -> [Bid]
-  tryGetAmountAndWinner:: a -> Maybe (Amount , UserId)
+  tryGetAmountAndWinner:: a -> Maybe (AmountValue , UserId)
   hasEnded:: a -> Bool
 
 -- composing two State types as a State by using Either

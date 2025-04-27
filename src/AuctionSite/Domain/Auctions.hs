@@ -43,12 +43,10 @@ validateBid:: Bid->Auction->Either Errors ()
 validateBid bid auction
   | bidder bid == seller auction =
     Left (SellerCannotPlaceBids (userId $ bidder bid, auctionId auction))
-  | amountCurrency (bidAmount bid) /= auctionCurrency auction =
-    Left (CurrencyConversion (auctionCurrency auction))
   | otherwise = Right ()
 
 type AuctionState = Either SB.State TA.State
-  
+
 emptyState :: Auction -> AuctionState
 emptyState Auction{ typ=SingleSealedBid opt, expiry=expiry' } = Left (SB.emptyState expiry' opt)
 emptyState Auction{ typ=TimedAscending opt, expiry=expiry', startsAt=startsAt' } = Right (TA.emptyState startsAt' expiry' opt)
@@ -59,9 +57,9 @@ instance FromJSON AuctionType where
   parseJSON = ofJsonOfRead "AuctionType"
 
 instance ToJSON Auction where
-  toJSON Auction { auctionId=auctionId', startsAt=startsAt', title=title', expiry=expiry', seller=seller', typ=typ', auctionCurrency=auctionCurrency' } = 
-    object [ "id".=auctionId', 
-             "startsAt" .= startsAt', 
+  toJSON Auction { auctionId=auctionId', startsAt=startsAt', title=title', expiry=expiry', seller=seller', typ=typ', auctionCurrency=auctionCurrency' } =
+    object [ "id".=auctionId',
+             "startsAt" .= startsAt',
              "title" .= title',
              "expiry" .= expiry',
              "user" .= seller',

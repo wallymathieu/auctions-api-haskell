@@ -20,7 +20,7 @@ import           Test.Hspec
 addAuction = C.AddAuction S.sampleStartsAt S.sampleAuction
 bid = C.PlaceBid S.sampleBidTime S.bid1
 vac0= Amount VAC 0
-timedAscending=TimedAscending (TA.Options vac0 vac0 (0::NominalDiffTime) )
+timedAscending=TimedAscending (TA.Options 0 0 (0::NominalDiffTime) )
 spec:: ()->SpecWith ()
 spec () = do
   describe "read json" $ do
@@ -29,19 +29,19 @@ spec () = do
       cmds `shouldNotBe` Nothing
     it "can deserialize type" $
       let
-        json    = "\"English|VAC0|VAC0|0\""
+        json    = "\"English|0|0|0\""
         decoded = decode $ BS.pack json :: Maybe AuctionType
       in
         decoded `shouldBe` Just timedAscending
     it "read add auction" $
       let
-        json    = "{\"$type\":\"AddAuction\",\"at\":\"2020-05-17T08:15:16.464Z\",\"auction\":{\"id\":1,\"startsAt\":\"2018-12-01T10:00:00.000Z\",\"title\":\"Some auction\",\"expiry\":\"2020-05-18T10:00:00.000Z\",\"user\":\"BuyerOrSeller|a1|Test\",\"type\":\"English|VAC0|VAC0|0\",\"currency\":\"VAC\"}}"
+        json    = "{\"$type\":\"AddAuction\",\"at\":\"2020-05-17T08:15:16.464Z\",\"auction\":{\"id\":1,\"startsAt\":\"2018-12-01T10:00:00.000Z\",\"title\":\"Some auction\",\"expiry\":\"2020-05-18T10:00:00.000Z\",\"user\":\"BuyerOrSeller|a1|Test\",\"type\":\"English|0|0|0\",\"currency\":\"VAC\"}}"
         decoded = decode $ BS.pack json :: Maybe C.Command
       in
         decoded `shouldNotBe` Nothing
     it "read place bid" $
       let
-        json    = "{\"$type\":\"PlaceBid\",\"at\":\"2020-05-17T08:15:22.948Z\",\"bid\":{\"id\":\"32e692cc3fdb451da9647d6eeca5b2e3\",\"auction\":1,\"user\":\"BuyerOrSeller|a2|Buyer\",\"amount\":\"VAC11\",\"at\":\"2020-05-17T08:15:22.940Z\"}}"
+        json    = "{\"$type\":\"PlaceBid\",\"at\":\"2020-05-17T08:15:22.948Z\",\"bid\":{\"id\":\"32e692cc3fdb451da9647d6eeca5b2e3\",\"auction\":1,\"user\":\"BuyerOrSeller|a2|Buyer\",\"amount\":11,\"at\":\"2020-05-17T08:15:22.940Z\"}}"
         decoded = decode $ BS.pack json :: Maybe C.Command
       in
         decoded `shouldNotBe` Nothing
@@ -61,7 +61,7 @@ spec () = do
         decoded `shouldBe` Just timedAscending
     it "can read auctiontype" $
       let
-        text = "English|VAC0|VAC0|0"
+        text = "English|0|0|0"
         decoded = readMaybe text
       in
         decoded `shouldBe` Just timedAscending
@@ -76,7 +76,7 @@ spec () = do
     it "can serialize place bid" $
       let
         encoded = toJSON bid
-        json = decode "{\"$type\":\"PlaceBid\",\"at\":\"2016-02-01T07:28:00.607875Z\",\"bid\":{\"amount\":\"SEK10\",\"at\":\"2016-01-01T08:28:00.607875000001Z\",\"auction\":1,\"user\":\"BuyerOrSeller|Buyer_1|Buyer 1\"}}"
+        json = decode "{\"$type\":\"PlaceBid\",\"at\":\"2016-02-01T07:28:00.607875Z\",\"bid\":{\"amount\":10,\"at\":\"2016-01-01T08:28:00.607875000001Z\",\"auction\":1,\"user\":\"BuyerOrSeller|Buyer_1|Buyer 1\"}}"
       in
         Just encoded `shouldBe` json
   describe "read and write json" $ do

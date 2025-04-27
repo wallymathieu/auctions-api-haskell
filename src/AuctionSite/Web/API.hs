@@ -27,9 +27,9 @@ import AuctionSite.Web.Jwt (JwtUser(..), unWrapJwtUser)
 -- API specification
 type AuctionAPI =
   "auctions" :> Get '[JSON] [AuctionListItem]
-  :<|> "auction" :> Capture "id" AuctionId :> Get '[JSON] AuctionDetails
-  :<|> "auction" :> Header "x-jwt-payload" JwtUser :> ReqBody '[JSON] AddAuctionReq :> Post '[JSON] Event
-  :<|> "auction" :> Capture "id" AuctionId :> "bid" :> Header "x-jwt-payload" JwtUser :> ReqBody '[JSON] BidReq :> Post '[JSON] Event
+  :<|> "auctions" :> Capture "id" AuctionId :> Get '[JSON] AuctionDetails
+  :<|> "auctions" :> Header "x-jwt-payload" JwtUser :> ReqBody '[JSON] AddAuctionReq :> Post '[JSON] Event
+  :<|> "auctions" :> Capture "id" AuctionId :> "bids" :> Header "x-jwt-payload" JwtUser :> ReqBody '[JSON] BidReq :> Post '[JSON] Event
 
 -- Data types for responses
 data AuctionListItem = AuctionListItem
@@ -57,11 +57,11 @@ data AuctionDetails = AuctionDetails
   , adCurrency :: Currency
   , adBids :: [AuctionBid]
   , adWinner :: Maybe UserId
-  , adWinnerPrice :: Maybe Amount
+  , adWinnerPrice :: Maybe AmountValue
   } deriving (Generic, Show)
 
 data AuctionBid = AuctionBid
-  { abAmount :: Amount
+  { abAmount :: AmountValue
   , abBidder :: User
   } deriving (Generic, Show)
 
@@ -179,7 +179,7 @@ createBidHandler auctionId' maybeUser req = do
             { forAuction = auctionId'
             , bidder = unWrapJwtUser userId'
             , at = now
-            , bidAmount = Amount VAC (amount req)
+            , bidAmount = amount req
             }
           command = PlaceBid now bid
       result <- liftIO $ atomically $ stateTVar appAuctions' (handle command)
