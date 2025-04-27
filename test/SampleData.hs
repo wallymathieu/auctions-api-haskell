@@ -41,7 +41,7 @@ sampleBid = Bid {
   forAuction =sampleAuctionId,
   bidder = sampleBuyer,
   at = sampleBidTime,
-  bidAmount = sek 100
+  bidAmount = 100
 }
 buyer1::User
 buyer1 = BuyerOrSeller "Buyer_1" "Buyer 1"
@@ -49,8 +49,8 @@ buyer2::User
 buyer2 = BuyerOrSeller "Buyer_2" "Buyer 2"
 buyer3::User
 buyer3 = BuyerOrSeller "Buyer_3" "Buyer 3"
-bidAmount1 :: Amount
-bidAmount1 = sek 10
+bidAmount1 :: AmountValue
+bidAmount1 = 10
 bid1 :: Bid
 bid1 =  Bid {
   bidder = buyer1,
@@ -58,8 +58,8 @@ bid1 =  Bid {
   forAuction = sampleAuctionId,
   at = addUTCTime (toEnum 1) sampleStartsAt
 }
-bidAmount2 :: Amount
-bidAmount2 = sek 12
+bidAmount2 :: AmountValue
+bidAmount2 = 12
 bid2 :: Bid
 bid2 = Bid {
   bidder = buyer2,
@@ -70,7 +70,7 @@ bid2 = Bid {
 bid_less_than_2 :: Bid
 bid_less_than_2 = Bid {
   bidder = buyer3,
-  bidAmount = sek 11,
+  bidAmount = 11,
   forAuction = sampleAuctionId,
   at = addUTCTime (toEnum 3) sampleStartsAt
 }
