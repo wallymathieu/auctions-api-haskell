@@ -10,11 +10,11 @@ data Bid = Bid {
   forAuction :: AuctionId,
   bidder :: User,
   at :: UTCTime,
-  bidAmount :: Amount
+  bidAmount :: AmountValue
 } deriving (Eq, Generic, Show)
 
 instance ToJSON Bid where
-  toJSON Bid { forAuction=auctionId', bidder=bidder', at=at', bidAmount=bidAmount' } = 
+  toJSON Bid { forAuction=auctionId', bidder=bidder', at=at', bidAmount=bidAmount' } =
     object [ "auction".=auctionId',
              "user" .= bidder',
              "at" .= at',

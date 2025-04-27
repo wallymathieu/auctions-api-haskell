@@ -14,7 +14,6 @@ import           Data.Time.Clock           (UTCTime)
 import           Control.Concurrent.STM    (stateTVar)
 
 import           AuctionSite.Domain
-import qualified AuctionSite.Money         as M
 import           AuctionSite.Web.Types
 import           AuctionSite.Web.Jwt       as Jwt
 
@@ -59,7 +58,7 @@ createBidOnAction onEvent getCurrentTime tid = do
   where
   mutateState :: BidReq -> User -> UTCTime -> Repository -> (Either Errors Event, Repository)
   mutateState BidReq { amount=amount' } bidder' now current =
-    let bid = Bid { bidder=bidder', at=now, bidAmount=M.Amount M.VAC amount', forAuction=tid }
+    let bid = Bid { bidder=bidder', at=now, bidAmount= amount', forAuction=tid }
         command = PlaceBid now bid
     in handle command current
 

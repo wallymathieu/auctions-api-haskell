@@ -48,7 +48,7 @@ spec =
     firstAuctionReqJson = "{\"id\":1,\"startsAt\":\"2018-01-01T10:00:00.000Z\",\"endsAt\":\"2019-01-01T10:00:00.000Z\",\"title\":\"First auction\", \"currency\":\"VAC\" }"
     auctionJson = [ "currency" .= String "VAC", "expiry" .= String "2019-01-01T10:00:00Z", "id".= Number 1, "startsAt".= String "2018-01-01T10:00:00Z", "title".= String "First auction"]
     auctionWithBidJsonValue = object $ auctionJson ++ ["bids" .= array [
-      object  ["amount" .= String "VAC11", "bidder" .= String "BuyerOrSeller|a2|Buyer"] ], "winner".=Null,"winnerPrice".=Null ]
+      object  ["amount" .= Number 11, "bidder" .= String "BuyerOrSeller|a2|Buyer"] ], "winner".=Null,"winnerPrice".=Null ]
     auctionWithoutBidJsonValue = object $ auctionJson ++ ["bids" .= array [], "winner".=Null,"winnerPrice".=Null ]
     auctionWithoutBidListJsonValue :: Value
     auctionWithoutBidListJsonValue = singletonArray $ object auctionJson
@@ -60,7 +60,7 @@ spec =
                                         "title" .= String "First auction",
                                         "expiry" .= String "2019-01-01T10:00:00Z",
                                         "user" .= String "BuyerOrSeller|a1|Test",
-                                        "type" .= String "English|VAC0|VAC0|0",
+                                        "type" .= String "English|0|0|0",
                                         "currency" .= String "VAC" ] ]
     bidAcceptedJsonValue :: Value
     bidAcceptedJsonValue = object [
@@ -69,7 +69,7 @@ spec =
         "bid" .= object [
             "auction" .= Number 1,
             "user" .= String "BuyerOrSeller|a2|Buyer",
-            "amount" .= String "VAC11",
+            "amount" .= Number 11,
             "at" .= String "2018-08-04T00:00:00Z" ] ]
     addAuctionOk = postWithHeader "/auctions" [(xJwtPayload, seller1)] firstAuctionReqJson `shouldRespondWith` fromValue auctionAddedJsonValue
     addBidOk = postWithHeader "/auctions/1/bids" [(xJwtPayload, buyer1)] "{\"amount\":11}" `shouldRespondWith` fromValue bidAcceptedJsonValue

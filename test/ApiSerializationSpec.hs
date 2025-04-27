@@ -13,8 +13,6 @@ import qualified AuctionSite.Money as M
 
 spec:: ()->SpecWith ()
 spec ()=do
-  let zeroVAC = M.Amount M.VAC 0
-
   describe "auction deserialization" $ do
     let startsAt' = read "2016-01-01 00:00:00.000000 UTC"::UTCTime
     let endsAt = read "2016-02-01 00:00:00.000000 UTC"::UTCTime
@@ -25,7 +23,7 @@ spec ()=do
                                      reqTitle = "First auction",
                                      reqStartsAt = startsAt', reqEndsAt = endsAt,
                                      reqCurrency = M.VAC,
-                                     reqTyp = TimedAscending $ DT.Options { DT.reservePrice = zeroVAC, DT.minRaise = zeroVAC, DT.timeFrame = 0.0 } }
+                                     reqTyp = TimedAscending $ DT.Options { DT.reservePrice = 0, DT.minRaise = 0, DT.timeFrame = 0.0 } }
       in firstAuction `shouldBe` Just expected
 
   describe "bid deserialization" $ do
