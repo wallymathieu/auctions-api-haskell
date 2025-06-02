@@ -1,16 +1,9 @@
 {
     "name": "DevContainer for Haskell",
-    "remoteUser": "vscode",
     "runArgs": [],
     "build": {
       "args": {
-        "USERNAME": "vscode",
-        "GHC_VERSION": "9.4.8",
-        "STACK_VERSION": "recommended",
-        "STACK_RESOLVER": "nightly",
-        "CABAL_VERSION": "recommended",
-        "HLS_VERSION": "recommended",
-        "LLVM_VERSION": "17"
+        "GHC_VERSION": "9.4.8"
       },
       "context": "..",
       "dockerfile": "Dockerfile"
