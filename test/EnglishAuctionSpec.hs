@@ -9,7 +9,7 @@ import           AuctionStateSpecs
 
 import           Test.Hspec
 import           Text.Read (readMaybe)
-import           Data.Time (secondsToNominalDiffTime)
+import           Data.Time (secondsToNominalDiffTime, addUTCTime)
 
 spec:: ()->SpecWith ()
 spec ()=do
@@ -49,6 +49,30 @@ spec ()=do
       maybeFail `shouldBe` Left (MustPlaceBidOverHighestBid bidAmount2)
 
     incrementSpec emptyAscAuctionState
+  describe "english auction timing" $ do
+    it "transitions to OnGoing after start" $
+      S.inc sampleBidTime emptyAscAuctionState `shouldBe` Right (TA.OnGoing [] sampleEndsAt TA.defaultOptions)
+
+    it "cant bid before auction starts" $
+      let earlyBid = bid1 { at = addUTCTime (secondsToNominalDiffTime (-1)) sampleStartsAt }
+          (_, err) = S.addBid earlyBid emptyAscAuctionState
+      in err `shouldBe` Left (AuctionHasNotStarted sampleAuctionId)
+
+    describe "timeFrame extension" $ do
+      let timeFrameOptions = TA.Options { reservePrice=0, minRaise=0, timeFrame=secondsToNominalDiffTime 3600 }
+          timeFrameAuction = sampleAuctionOfTyp (TimedAscending timeFrameOptions)
+          onGoingState = S.inc sampleBidTime (emptyState timeFrameAuction)
+          nearEndTime = addUTCTime (secondsToNominalDiffTime (-1800)) sampleEndsAt
+          nearEndBid = bid1 { at = nearEndTime }
+          (stateAfterBid, _) = S.addBid nearEndBid onGoingState
+          extendedExpiry = addUTCTime (secondsToNominalDiffTime 3600) nearEndTime
+
+      it "bid near end extends expiry" $
+        S.hasEnded (S.inc sampleEndsAt stateAfterBid) `shouldBe` False
+
+      it "auction ends after extended expiry" $
+        S.hasEnded (S.inc (addUTCTime 1 extendedExpiry) stateAfterBid) `shouldBe` True
+
   describe "english auction type serialization" $ do
     let sampleTypStr = "English|0|0|0"
     let sampleTyp = TA.defaultOptions

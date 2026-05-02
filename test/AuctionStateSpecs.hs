@@ -27,3 +27,11 @@ incrementSpec baseState =
       let state = S.inc (addUTCTime (toEnum 1) sampleEndsAt) baseState
       in S.hasEnded state `shouldBe` True
 
+    it "will end at exactly the end time" $
+      let state = S.inc sampleEndsAt baseState
+      in S.hasEnded state `shouldBe` True
+
+    it "wont end at exactly the start time" $
+      let state = S.inc sampleStartsAt baseState
+      in S.hasEnded state `shouldBe` False
+
