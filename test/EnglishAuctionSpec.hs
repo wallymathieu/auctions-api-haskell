@@ -59,7 +59,7 @@ spec ()=do
       in err `shouldBe` Left (AuctionHasNotStarted sampleAuctionId)
 
     describe "timeFrame extension" $ do
-      let timeFrameOptions = TA.Options { reservePrice=0, minRaise=0, timeFrame=secondsToNominalDiffTime 3600 }
+      let timeFrameOptions = TA.Options { TA.reservePrice=0, TA.minRaise=0, TA.timeFrame=secondsToNominalDiffTime 3600 }
           timeFrameAuction = sampleAuctionOfTyp (TimedAscending timeFrameOptions)
           onGoingState = S.inc sampleBidTime (emptyState timeFrameAuction)
           nearEndTime = addUTCTime (secondsToNominalDiffTime (-1800)) sampleEndsAt
