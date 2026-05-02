@@ -40,3 +40,13 @@ data Errors =
   | MustPlaceBidOverHighestBid AmountValue
   | AlreadyPlacedBid
   deriving (Eq,Show)
+
+instance ToJSON Errors where
+  toJSON (UnknownAuction a)             = object ["type" .= String "UnknownAuction", "auctionId" .= a]
+  toJSON (AuctionAlreadyExists a)       = object ["type" .= String "AuctionAlreadyExists", "auctionId" .= a]
+  toJSON (AuctionHasEnded a)            = object ["type" .= String "AuctionHasEnded", "auctionId" .= a]
+  toJSON (AuctionHasNotStarted a)       = object ["type" .= String "AuctionHasNotStarted", "auctionId" .= a]
+  toJSON (SellerCannotPlaceBids (u, a)) = object ["type" .= String "SellerCannotPlaceBids", "userId" .= u, "auctionId" .= a]
+  toJSON (InvalidUserData u)            = object ["type" .= String "InvalidUserData", "user" .= u]
+  toJSON (MustPlaceBidOverHighestBid a) = object ["type" .= String "MustPlaceBidOverHighestBid", "amount" .= a]
+  toJSON AlreadyPlacedBid               = object ["type" .= String "AlreadyPlacedBid"]
