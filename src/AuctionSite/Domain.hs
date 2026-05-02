@@ -62,7 +62,7 @@ handle state repository =
           Left err -> failureOf err
       Left err -> failureOf err
     Nothing ->
-      failureOf $ UnknownAuction aId
+      failureOf $ AuctionNotFound aId
   where
     failureOf failure = (Left failure, repository)
     successOf success nextRepo = (Right success, nextRepo)

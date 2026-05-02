@@ -44,7 +44,7 @@ createBidOnAction onEvent getCurrentTime tid = do
     AppState { appAuctions = auctions' } <- getState
     res <- liftIO ( getCurrentTime >>= (atomically . stateTVar auctions' . mutateState req userId') )
     case res of
-      Left err@(UnknownAuction _)-> setStatus Http.status404 >> json err
+      Left err@(AuctionNotFound _)-> setStatus Http.status404 >> json err
       Left err-> setStatus Http.status400 >> json err
       Right ok-> do
         liftIO $ onEvent ok
@@ -61,7 +61,7 @@ getAuctionAction :: AuctionId -> ApiAction a
 getAuctionAction tid = do
   maybeAuction <- readAuction tid
   case maybeAuction of
-    Nothing -> setStatus Http.status404 >> json (UnknownAuction tid)
+    Nothing -> setStatus Http.status404 >> json (AuctionNotFound tid)
     Just (auction,auctionState) ->
       let maybeAmountAndWinner = tryGetAmountAndWinner auctionState
           amount' = fst <$> maybeAmountAndWinner

@@ -31,7 +31,7 @@ instance FromJSON User where
 type AuctionId = Integer
 
 data Errors =
-  UnknownAuction AuctionId
+  AuctionNotFound AuctionId
   | AuctionAlreadyExists AuctionId
   | AuctionHasEnded AuctionId
   | AuctionHasNotStarted AuctionId
@@ -42,7 +42,7 @@ data Errors =
   deriving (Eq,Show)
 
 instance ToJSON Errors where
-  toJSON (UnknownAuction a)             = object ["type" .= String "UnknownAuction", "auctionId" .= a]
+  toJSON (AuctionNotFound a)             = object ["type" .= String "AuctionNotFound", "auctionId" .= a]
   toJSON (AuctionAlreadyExists a)       = object ["type" .= String "AuctionAlreadyExists", "auctionId" .= a]
   toJSON (AuctionHasEnded a)            = object ["type" .= String "AuctionHasEnded", "auctionId" .= a]
   toJSON (AuctionHasNotStarted a)       = object ["type" .= String "AuctionHasNotStarted", "auctionId" .= a]
