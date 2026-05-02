@@ -23,6 +23,12 @@ ghcup set ghc 9.4.8
 cabal run
 ```
 
+If you use cabal installed on Ubuntu you might need to do:
+
+```sh
+cabal run auction-site-exe --reorder-goals
+```
+
 ### To test the app
 
 ```sh
@@ -35,6 +41,20 @@ cabal test
 cabal install hlint
 hlint .
 ```
+
+### Docker
+
+Build and run the application in a Docker container:
+
+```sh
+# Build the Docker image
+docker build -t auction-site .
+
+# Run the container
+docker run -p 8080:8080 auction-site
+```
+
+The Docker image uses a multi-stage build to keep the final image size small. The application will be accessible at `http://localhost:8080`.
 
 ## API Endpoints
 
