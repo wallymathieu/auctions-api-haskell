@@ -8,7 +8,6 @@ import           GHC.Conc                  (newTVar, readTVarIO, atomically)
 import           Prelude
 import           Control.Monad.IO.Class    (liftIO)
 import qualified Network.HTTP.Types.Status as Http
-import qualified Data.Text                 as T
 import qualified Data.Map                  as Map
 import           Data.Time.Clock           (UTCTime)
 import           Control.Concurrent.STM    (stateTVar)
@@ -17,8 +16,6 @@ import           AuctionSite.Domain
 import           AuctionSite.Web.Types
 import           AuctionSite.Web.Jwt       as Jwt
 
-notFoundJson :: T.Text -> ApiAction a
-notFoundJson msg = setStatus Http.status404 >> json (ApiError { message = msg })
 
 {- | Invoke onAuth if there is a base64 encoded x-jwt-payload header -}
 withXAuth :: (User -> ApiAction a) -> ApiAction a
@@ -40,9 +37,6 @@ readAuctions = do
   auctions' <- liftIO $ readTVarIO $ appAuctions data'
   return (map fst (Map.elems auctions'))
 
-auctionNotFound :: T.Text
-auctionNotFound = "Auction not found"
-
 createBidOnAction :: (Event-> IO ()) -> IO UTCTime -> AuctionId -> ApiAction a
 createBidOnAction onEvent getCurrentTime tid = do
   req <- jsonBody' :: ApiAction BidReq
@@ -50,7 +44,7 @@ createBidOnAction onEvent getCurrentTime tid = do
     AppState { appAuctions = auctions' } <- getState
     res <- liftIO ( getCurrentTime >>= (atomically . stateTVar auctions' . mutateState req userId') )
     case res of
-      Left (UnknownAuction _)-> setStatus Http.status404 >> text auctionNotFound
+      Left err@(UnknownAuction _)-> setStatus Http.status404 >> json err
       Left err-> setStatus Http.status400 >> json err
       Right ok-> do
         liftIO $ onEvent ok
@@ -67,7 +61,7 @@ getAuctionAction :: AuctionId -> ApiAction a
 getAuctionAction tid = do
   maybeAuction <- readAuction tid
   case maybeAuction of
-    Nothing -> notFoundJson auctionNotFound
+    Nothing -> setStatus Http.status404 >> json (UnknownAuction tid)
     Just (auction,auctionState) ->
       let maybeAmountAndWinner = tryGetAmountAndWinner auctionState
           amount' = fst <$> maybeAmountAndWinner
