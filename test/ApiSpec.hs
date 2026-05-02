@@ -82,4 +82,4 @@ spec =
     addBidSpec = describe "add bids to auction" $ do
       it "possible to add bid to auction" $ do addAuctionOk ; addBidOk
       it "possible to see the added bids" $ do addAuctionOk ; addBidOk ; get "/auctions/1" `shouldRespondWith` fromValue auctionWithBidJsonValue
-      it "not possible to add bid to non existant auction" $ postWithHeader "/auctions/2/bids" [(xJwtPayload, buyer1)] "{\"amount\":10}" `shouldRespondWith` "Auction not found" {matchStatus = 404}
+      it "not possible to add bid to non existant auction" $ postWithHeader "/auctions/2/bids" [(xJwtPayload, buyer1)] "{\"amount\":10}" `shouldRespondWith` "{\"auctionId\":2,\"type\":\"AuctionNotFound\"}" {matchStatus = 404}
