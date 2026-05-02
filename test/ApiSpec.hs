@@ -76,7 +76,7 @@ spec =
 
     addAuctionSpec = describe "add auction" $ do
       it "possible to add auction" addAuctionOk
-      it "not possible to same auction twice" $ do addAuctionOk; postWithHeader "/auctions" [(xJwtPayload, seller1)] firstAuctionReqJson `shouldRespondWith` "\"AuctionAlreadyExists 1\"" {matchStatus = 400}
+      it "not possible to same auction twice" $ do addAuctionOk; postWithHeader "/auctions" [(xJwtPayload, seller1)] firstAuctionReqJson `shouldRespondWith` fromValue (object ["type" .= String "AuctionAlreadyExists", "auctionId" .= Number 1]) {matchStatus = 400}
       it "returns added auction" $ do addAuctionOk; get "/auctions/1" `shouldRespondWith` fromValue auctionWithoutBidJsonValue
       it "returns added auctions" $ do addAuctionOk; get "/auctions" `shouldRespondWith` fromValue auctionWithoutBidListJsonValue
     addBidSpec = describe "add bids to auction" $ do
