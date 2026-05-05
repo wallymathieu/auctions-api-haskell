@@ -12,6 +12,8 @@ import qualified Data.ByteString.Lazy as LB
 import           Network.HTTP.Types (methodGet, methodPost, Header, HeaderName)
 import           Data.Time (UTCTime(..))
 import qualified Data.Map as Map
+import           Data.IORef (newIORef, writeIORef, readIORef)
+import           Control.Monad.IO.Class (liftIO)
 
 import           Test.Hspec
 import           Test.Hspec.Wai
@@ -38,13 +40,39 @@ configuredApp = do
   spock spockCfg (app onEvent getCurrentTime)
 
 spec :: Spec
-spec =
+spec = do
     with (spockAsApp configuredApp) $ do addAuctionSpec; addBidSpec
+    describe "ended auction" $ do
+      timeRef <- runIO $ newIORef earlyTime
+      with (spockAsApp (mutableApp timeRef)) $
+        it "reflects ended state with winner and price after expiry" $ do
+          postWithHeader "/auctions" [(xJwtPayload, seller1)] endingSoonJson `shouldRespondWith` 200
+          postWithHeader "/auctions/1/bids" [(xJwtPayload, buyer1)] "{\"amount\":42}" `shouldRespondWith` 200
+          liftIO $ writeIORef timeRef lateTime
+          get "/auctions/1" `shouldRespondWith` fromValue endedAuctionValue
   where
     singletonArray = Array . singleton
     array = Array . fromList
     seller1 = "eyJzdWIiOiJhMSIsICJuYW1lIjoiVGVzdCIsICJ1X3R5cCI6IjAifQo="
     buyer1 = "eyJzdWIiOiJhMiIsICJuYW1lIjoiQnV5ZXIiLCAidV90eXAiOiIwIn0K"
+    earlyTime = read "2018-07-01 00:00:00.000000 UTC" :: UTCTime
+    lateTime  = read "2018-07-16 00:00:00.000000 UTC" :: UTCTime
+    mutableApp timeRef = do
+      writeIORef timeRef earlyTime
+      state <- initAppState Map.empty
+      spockCfg <- defaultSpockCfg () PCNoDatabase state
+      spock spockCfg (app onEvent (readIORef timeRef))
+    endingSoonJson = "{\"id\":1,\"startsAt\":\"2017-01-01T00:00:00.000Z\",\"endsAt\":\"2018-07-15T00:00:00.000Z\",\"title\":\"Ending Soon\",\"currency\":\"VAC\"}"
+    endedAuctionValue = object
+      [ "id"          .= Number 1
+      , "startsAt"    .= String "2017-01-01T00:00:00Z"
+      , "title"       .= String "Ending Soon"
+      , "expiry"      .= String "2018-07-15T00:00:00Z"
+      , "currency"    .= String "VAC"
+      , "bids"        .= array [object ["amount" .= Number 42, "bidder" .= String "BuyerOrSeller|a2|Buyer"]]
+      , "winner"      .= String "a2"
+      , "winnerPrice" .= Number 42
+      ]
     firstAuctionReqJson = "{\"id\":1,\"startsAt\":\"2018-01-01T10:00:00.000Z\",\"endsAt\":\"2019-01-01T10:00:00.000Z\",\"title\":\"First auction\", \"currency\":\"VAC\" }"
     endedAuctionReqJson = "{\"id\":1,\"startsAt\":\"2017-01-01T10:00:00.000Z\",\"endsAt\":\"2018-01-01T10:00:00.000Z\",\"title\":\"Ended auction\", \"currency\":\"VAC\" }"
     auctionJson = [ "currency" .= String "VAC", "expiry" .= String "2019-01-01T10:00:00Z", "id".= Number 1, "startsAt".= String "2018-01-01T10:00:00Z", "title".= String "First auction"]
