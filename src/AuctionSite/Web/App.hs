@@ -57,16 +57,18 @@ createBidOnAction onEvent getCurrentTime tid = do
     in handle command current
 
 
-getAuctionAction :: AuctionId -> ApiAction a
-getAuctionAction tid = do
+getAuctionAction :: IO UTCTime -> AuctionId -> ApiAction a
+getAuctionAction getCurrentTime tid = do
+  now <- liftIO getCurrentTime
   maybeAuction <- readAuction tid
   case maybeAuction of
     Nothing -> setStatus Http.status404 >> json (AuctionNotFound tid)
     Just (auction,auctionState) ->
-      let maybeAmountAndWinner = tryGetAmountAndWinner auctionState
+      let currentState = inc now auctionState
+          maybeAmountAndWinner = tryGetAmountAndWinner currentState
           amount' = fst <$> maybeAmountAndWinner
           winner = snd <$> maybeAmountAndWinner
-      in json (object (["bids" .= map toAuctionBidJson (getBids auctionState), "winner" .= winner, "winnerPrice" .= amount' ] ++ toAuctionListItemKV auction) )
+      in json (object (["bids" .= map toAuctionBidJson (getBids currentState), "winner" .= winner, "winnerPrice" .= amount' ] ++ toAuctionListItemKV auction) )
 
 createAuctionAction ::  (Event-> IO ()) -> IO UTCTime -> ApiAction a
 createAuctionAction onEvent getCurrentTime = do
@@ -103,7 +105,7 @@ toAuctionBidJson Bid { bidAmount=amount', bidder=bidder' } =
 app :: (Event-> IO ()) -> IO UTCTime -> Api
 app onEvent getCurrentTime = do
   get "auctions" getAuctionsAction
-  get ("auctions" <//> var) getAuctionAction
+  get ("auctions" <//> var) (getAuctionAction getCurrentTime)
   post "auctions" (createAuctionAction onEvent getCurrentTime)
   post ("auctions" <//> var <//> "bids") (createBidOnAction onEvent getCurrentTime)
 

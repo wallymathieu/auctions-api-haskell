@@ -41,12 +41,14 @@ handle state repository =
   AddAuction time auction ->
     let aId = auctionId auction
     in
-    if not (Map.member aId repository) then
+    if Map.member aId repository then
+      failureOf $ AuctionAlreadyExists aId
+    else if expiry auction <= time then
+      failureOf $ AuctionHasEnded aId
+    else
       let empty = emptyState auction
           nextRepository= Map.insert aId (auction, empty) repository
       in successOf (AuctionAdded time auction) nextRepository
-    else
-      failureOf $ AuctionAlreadyExists aId
   PlaceBid time bid ->
     let aId = forAuction bid
     in
