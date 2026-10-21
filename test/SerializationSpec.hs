@@ -11,6 +11,8 @@ import qualified SampleData as S
 import           Data.Time
 import           Data.Aeson
 import qualified Data.ByteString.Lazy.Char8 as BS
+import           Control.Exception (bracket_)
+import           GHC.IO.Encoding (getLocaleEncoding, setLocaleEncoding, mkTextEncoding)
 import           Text.Read (readMaybe)
 import           System.Directory
 
@@ -91,6 +93,14 @@ spec () = do
           cmds2 <- readCommands tmpSampleCommands
           cmds2 `shouldBe` cmds
         Nothing -> error "no commands"
+    it "reads and writes non-ASCII regardless of locale" $ do
+      ascii <- mkTextEncoding "ASCII"
+      previous <- getLocaleEncoding
+      bracket_ (setLocaleEncoding ascii) (setLocaleEncoding previous) $ do
+        removeIfExists tmpNonAscii
+        writeCommands tmpNonAscii [nonAsciiAuction]
+        writeCommands tmpNonAscii [nonAsciiAuction]
+        readCommands tmpNonAscii `shouldReturn` Just [nonAsciiAuction, nonAsciiAuction]
 
 removeIfExists :: FilePath -> IO ()
 removeIfExists fileName =
@@ -100,3 +110,6 @@ removeIfExists fileName =
       else removeFile fileName
 
 tmpSampleCommands = "./tmp/sample-commands.jsonl"
+tmpNonAscii = "./tmp/non-ascii-commands.jsonl"
+
+nonAsciiAuction = C.AddAuction S.sampleStartsAt S.sampleAuction { title = "\197sa \8211 \127881" }
