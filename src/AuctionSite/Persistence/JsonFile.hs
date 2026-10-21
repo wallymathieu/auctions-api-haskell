@@ -12,20 +12,19 @@ readJsonFile path = do
     if not exists
     then return Nothing
     else do
-      c <- readFile path
-      case mapM parseJson (lines c) of
+      c <- BS.readFile path
+      case mapM decode (BS.lines c) of
         Just items -> return $ Just (concat items)
         Nothing -> return Nothing
-  where parseJson v = decode $ BS.pack v
 
 -- Generic write function for any JSON-encodable type
 writeJsonFile :: ToJSON a => FilePath -> [a] -> IO ()
 writeJsonFile path items =
   doesFileExist path >>= \exists ->
     if not exists
-    then writeFile path c
-    else appendFile path ("\n"++c)
-  where c = BS.unpack $ encode items
+    then BS.writeFile path c
+    else BS.appendFile path (BS.cons '\n' c)
+  where c = encode items
 
 -- Specialized functions using the generic implementations
 readCommands :: FilePath -> IO (Maybe [C.Command])
