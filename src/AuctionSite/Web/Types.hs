@@ -30,7 +30,7 @@ instance ToJSON BidReq
 instance FromJSON BidReq
 
 data AddAuctionReq = AddAuctionReq {
-  reqId :: AuctionId,
+  reqId :: Maybe AuctionId,
   reqStartsAt :: UTCTime,
   reqTitle :: String,
   reqEndsAt :: UTCTime,
@@ -42,7 +42,7 @@ data AddAuctionReq = AddAuctionReq {
 
 instance FromJSON AddAuctionReq where
  parseJSON (Object v) =
-      AddAuctionReq <$> v .: "id"
+      AddAuctionReq <$> v .:? "id"
                     <*> v .: "startsAt"
                     <*> v .: "title"
                     <*> v .: "endsAt"

@@ -10,6 +10,7 @@ import           Control.Monad.IO.Class    (liftIO)
 import qualified Network.HTTP.Types.Status as Http
 import qualified Data.Map                  as Map
 import           Data.Time.Clock           (UTCTime)
+import           Data.Maybe                (fromMaybe)
 import           Control.Concurrent.STM    (stateTVar)
 
 import           AuctionSite.Domain
@@ -83,11 +84,15 @@ createAuctionAction onEvent getCurrentTime = do
         json ok
   where
   mutateState :: AddAuctionReq -> User -> UTCTime -> Repository -> (Either Errors Event, Repository)
-  mutateState AddAuctionReq { reqId=auctionId', reqStartsAt=startsAt', reqTitle=title', reqEndsAt=endsAt', reqCurrency=cur, reqTyp=typ'} userId' now current =
-    let auction = (Auction { auctionId = auctionId', startsAt = startsAt', title = title', expiry = endsAt',
+  mutateState AddAuctionReq { reqId=maybeAuctionId, reqStartsAt=startsAt', reqTitle=title', reqEndsAt=endsAt', reqCurrency=cur, reqTyp=typ'} userId' now current =
+    let auctionId' = fromMaybe (nextAuctionId current) maybeAuctionId
+        auction = (Auction { auctionId = auctionId', startsAt = startsAt', title = title', expiry = endsAt',
                              seller = userId', typ = typ', auctionCurrency = cur} )
         command = AddAuction now auction
     in handle command current
+
+nextAuctionId :: Repository -> AuctionId
+nextAuctionId repository = maybe 1 ((+1) . fst) (Map.lookupMax repository)
 
 getAuctionsAction :: ApiAction a
 getAuctionsAction = do

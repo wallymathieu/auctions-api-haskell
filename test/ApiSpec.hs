@@ -74,6 +74,7 @@ spec = do
       , "winnerPrice" .= Number 42
       ]
     firstAuctionReqJson = "{\"id\":1,\"startsAt\":\"2018-01-01T10:00:00.000Z\",\"endsAt\":\"2019-01-01T10:00:00.000Z\",\"title\":\"First auction\", \"currency\":\"VAC\" }"
+    auctionWithoutIdReqJson = "{\"startsAt\":\"2018-01-01T10:00:00.000Z\",\"endsAt\":\"2019-01-01T10:00:00.000Z\",\"title\":\"First auction\", \"currency\":\"VAC\" }"
     endedAuctionReqJson = "{\"id\":1,\"startsAt\":\"2017-01-01T10:00:00.000Z\",\"endsAt\":\"2018-01-01T10:00:00.000Z\",\"title\":\"Ended auction\", \"currency\":\"VAC\" }"
     auctionJson = [ "currency" .= String "VAC", "expiry" .= String "2019-01-01T10:00:00Z", "id".= Number 1, "startsAt".= String "2018-01-01T10:00:00Z", "title".= String "First auction"]
     auctionWithBidJsonValue = object $ auctionJson ++ ["bids" .= array [
@@ -105,6 +106,7 @@ spec = do
 
     addAuctionSpec = describe "add auction" $ do
       it "possible to add auction" addAuctionOk
+      it "possible to add auction without id" $ postWithHeader "/auctions" [(xJwtPayload, seller1)] auctionWithoutIdReqJson `shouldRespondWith` fromValue auctionAddedJsonValue
       it "not possible to same auction twice" $ do addAuctionOk; postWithHeader "/auctions" [(xJwtPayload, seller1)] firstAuctionReqJson `shouldRespondWith` (fromValue (object ["type" .= String "AuctionAlreadyExists", "auctionId" .= Number 1])) {matchStatus = 400}
       it "returns added auction" $ do addAuctionOk; get "/auctions/1" `shouldRespondWith` fromValue auctionWithoutBidJsonValue
       it "returns added auctions" $ do addAuctionOk; get "/auctions" `shouldRespondWith` fromValue auctionWithoutBidListJsonValue
