@@ -19,12 +19,16 @@ spec ()=do
     let firstAuction = decode "{ \"id\":1,\"startsAt\":\"2016-01-01T00:00:00.000Z\",\"endsAt\":\"2016-02-01T00:00:00.000Z\",\"title\":\"First auction\" }" :: Maybe AddAuctionReq
 
     it "can understand first auction" $
-      let expected = AddAuctionReq { reqId = sampleAuctionId,
+      let expected = AddAuctionReq { reqId = Just sampleAuctionId,
                                      reqTitle = "First auction",
                                      reqStartsAt = startsAt', reqEndsAt = endsAt,
                                      reqCurrency = M.VAC,
                                      reqTyp = TimedAscending $ DT.Options { DT.reservePrice = 0, DT.minRaise = 0, DT.timeFrame = 0.0 } }
       in firstAuction `shouldBe` Just expected
+
+    it "can understand auction without id" $
+      let withoutId = decode "{ \"startsAt\":\"2016-01-01T00:00:00.000Z\",\"endsAt\":\"2016-02-01T00:00:00.000Z\",\"title\":\"First auction\" }" :: Maybe AddAuctionReq
+      in reqId <$> withoutId `shouldBe` Just Nothing
 
   describe "bid deserialization" $ do
     let bidOfTen = decode "{ \"amount\":10 }" :: Maybe BidReq
